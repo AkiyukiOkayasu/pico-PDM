@@ -4,7 +4,7 @@
 #![no_std]
 #![no_main]
 
-use bsp::{entry, hal::xosc::setup_xosc_blocking};
+use bsp::entry;
 use defmt::*;
 use defmt_rtt as _;
 use embedded_hal::digital::v2::OutputPin;
@@ -20,10 +20,11 @@ use bsp::hal::{
     pac,
     pll::{
         common_configs::{PLL_SYS_125MHZ, PLL_USB_48MHZ},
-        setup_pll_blocking,
+        setup_pll_blocking, PLLConfig,
     },
     sio::Sio,
     watchdog::Watchdog,
+    xosc::setup_xosc_blocking,
 };
 
 use fugit::HertzU32;
@@ -39,6 +40,15 @@ const PIO_CLOCK_HZ: HertzU32 = HertzU32::from_raw(15_360_000u32);
 
 /// PIOの分周比率 15=RP2040動作周波数/PIO動作周波数
 const PIO_CLOCKDIV_INT: u32 = RP2040_CLOCK_HZ.raw() / PIO_CLOCK_HZ.raw();
+
+/// RP2040を76.8MHzで動作させるためのPLL設定
+/// $PICO_SDK/src/rp2_common/hardware_clocks/scripts/vcocalc.py
+const SYS_PLL_CONFIG_76800KHZ: PLLConfig = PLLConfig {
+    vco_freq: HertzU32::MHz(1536),
+    refdiv: 1,
+    post_div1: 5,
+    post_div2: 4,
+};
 
 #[entry]
 fn main() -> ! {
@@ -66,7 +76,7 @@ fn main() -> ! {
     let pll_sys = setup_pll_blocking(
         pac.PLL_SYS,
         xosc.operating_frequency().into(),
-        PLL_SYS_125MHZ,
+        SYS_PLL_CONFIG_76800KHZ,
         &mut clocks,
         &mut pac.RESETS,
     )
