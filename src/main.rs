@@ -18,16 +18,15 @@ use rp_pico as bsp;
 use bsp::hal::{
     clocks::{Clock, ClockSource, ClocksManager, InitError},
     pac,
-    pll::{
-        common_configs::{PLL_SYS_125MHZ, PLL_USB_48MHZ},
-        setup_pll_blocking, PLLConfig,
-    },
+    pll::{common_configs::PLL_USB_48MHZ, setup_pll_blocking, PLLConfig},
     sio::Sio,
     watchdog::Watchdog,
     xosc::setup_xosc_blocking,
 };
 
 use fugit::HertzU32;
+
+mod rp2040_pll_settings_for_48khz_audio;
 
 /// External high-speed crystal on the pico board is 12Mhz
 const EXTERNAL_XTAL_FREQ_HZ: HertzU32 = HertzU32::from_raw(12_000_000u32);
@@ -76,7 +75,7 @@ fn main() -> ! {
     let pll_sys = setup_pll_blocking(
         pac.PLL_SYS,
         xosc.operating_frequency().into(),
-        SYS_PLL_CONFIG_76800KHZ,
+        rp2040_pll_settings_for_48khz_audio::SYS_PLL_CONFIG_153P6MHZ,
         &mut clocks,
         &mut pac.RESETS,
     )
