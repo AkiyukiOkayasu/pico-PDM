@@ -74,7 +74,7 @@ fn main() -> ! {
     // PLL USB: 12 / 1 = 12MHz * 40  = 480 MHz / 5 / 2 =  48MHz
     let pll_sys = setup_pll_blocking(
         pac.PLL_SYS,
-        xosc.operating_frequency().into(),
+        xosc.operating_frequency(),
         rp2040_pll_settings_for_48khz_audio::SYS_PLL_CONFIG_153P6MHZ,
         &mut clocks,
         &mut pac.RESETS,
@@ -85,7 +85,7 @@ fn main() -> ! {
 
     let pll_usb = setup_pll_blocking(
         pac.PLL_USB,
-        xosc.operating_frequency().into(),
+        xosc.operating_frequency(),
         PLL_USB_48MHZ,
         &mut clocks,
         &mut pac.RESETS,
