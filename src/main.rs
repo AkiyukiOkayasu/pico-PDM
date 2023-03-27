@@ -7,8 +7,9 @@
 use bsp::entry;
 use defmt::*;
 use defmt_rtt as _;
-use embedded_hal::digital::v2::OutputPin;
+use fugit::HertzU32;
 use panic_probe as _;
+use pio_proc::pio_asm;
 
 // Provide an alias for our BSP so we can switch targets quickly.
 // Uncomment the BSP you included in Cargo.toml, the rest of the code does not need to change.
@@ -17,14 +18,14 @@ use rp_pico as bsp;
 
 use bsp::hal::{
     clocks::{Clock, ClockSource, ClocksManager, InitError},
+    gpio::{FunctionPio0, Pin},
     pac,
+    pio::{PIOBuilder, PIOExt},
     pll::{common_configs::PLL_USB_48MHZ, setup_pll_blocking, PLLConfig},
     sio::Sio,
     watchdog::Watchdog,
     xosc::setup_xosc_blocking,
 };
-
-use fugit::HertzU32;
 
 mod rp2040_pll_settings_for_48khz_audio;
 
@@ -146,27 +147,56 @@ fn main() -> ! {
 
     let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
 
-    let pins = bsp::Pins::new(
+    // let pins = bsp::Pins::new(
+    //     pac.IO_BANK0,
+    //     pac.PADS_BANK0,
+    //     sio.gpio_bank0,
+    //     &mut pac.RESETS,
+    // );
+
+    // // This is the correct pin on the Raspberry Pico board. On other boards, even if they have an
+    // // on-board LED, it might need to be changed.
+    // // Notably, on the Pico W, the LED is not connected to any of the RP2040 GPIOs but to the cyw43 module instead. If you have
+    // // a Pico W and want to toggle a LED with a simple GPIO output pin, you can connect an external
+    // // LED to one of the GPIO pins, and reference that pin here.
+    // let mut led_pin = pins.led.into_push_pull_output();
+
+    let pins = bsp::hal::gpio::Pins::new(
         pac.IO_BANK0,
         pac.PADS_BANK0,
         sio.gpio_bank0,
         &mut pac.RESETS,
     );
 
-    // This is the correct pin on the Raspberry Pico board. On other boards, even if they have an
-    // on-board LED, it might need to be changed.
-    // Notably, on the Pico W, the LED is not connected to any of the RP2040 GPIOs but to the cyw43 module instead. If you have
-    // a Pico W and want to toggle a LED with a simple GPIO output pin, you can connect an external
-    // LED to one of the GPIO pins, and reference that pin here.
-    let mut led_pin = pins.led.into_push_pull_output();
+    // configure LED pin for Pio0.
+    let _led: Pin<_, FunctionPio0> = pins.gpio25.into_mode();
+    // PIN id for use inside of PIO
+    let led_pin_id = 25;
 
+    // Define some simple PIO program.
+    let pio_program = pio_asm!(
+        "set pindirs, 1",
+        ".wrap_target",
+        "set pins, 0 [31]",
+        "set pins, 1 [31]",
+        ".wrap",
+    );
+    let pio_program = pio_program.program;
+
+    // Initialize and start PIO
+    let (mut pio, sm0, _, _, _) = pac.PIO0.split(&mut pac.RESETS);
+    let installed = pio.install(&pio_program).unwrap();
+    let (mut sm, _, _) = PIOBuilder::from_program(installed)
+        .set_pins(led_pin_id, 1)
+        .clock_divisor_fixed_point(0, 0)
+        .build(sm0);
+    // The GPIO pin needs to be configured as an output.
+    sm.set_pindirs([(led_pin_id, bsp::hal::pio::PinDir::Output)]);
+    sm.start();
+
+    // PIO runs in background, independently from CPU
     loop {
-        info!("on!");
-        led_pin.set_high().unwrap();
-        delay.delay_ms(500);
-        info!("off!");
-        led_pin.set_low().unwrap();
-        delay.delay_ms(500);
+        cortex_m::asm::wfi();
     }
 }
 
