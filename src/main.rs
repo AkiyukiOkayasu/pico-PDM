@@ -9,7 +9,7 @@ use defmt::*;
 use defmt_rtt as _;
 use fugit::HertzU32;
 use panic_probe as _;
-use pio_proc::pio_asm;
+use pio_proc::pio_file;
 
 // Provide an alias for our BSP so we can switch targets quickly.
 // Uncomment the BSP you included in Cargo.toml, the rest of the code does not need to change.
@@ -18,7 +18,7 @@ use rp_pico as bsp;
 
 use bsp::hal::{
     clocks::{Clock, ClockSource, ClocksManager, InitError},
-    gpio::{FunctionPio0, Pin},
+    gpio::FunctionPio0,
     pac,
     pio::{PIOBuilder, PIOExt},
     pll::{common_configs::PLL_USB_48MHZ, setup_pll_blocking},
@@ -148,31 +148,25 @@ fn main() -> ! {
         &mut pac.RESETS,
     );
 
-    // configure LED pin for Pio0.
-    let _led: Pin<_, FunctionPio0> = pins.gpio25.into_mode();
+    // configure GPIO for PIO0.
+    let _mclk = pins.gpio18.into_mode::<FunctionPio0>();
     // PIN id for use inside of PIO
-    let led_pin_id = 25;
+    const MCLK_PIN_ID: u8 = 18u8; //output
 
-    // Define some simple PIO program.
-    let pio_program = pio_asm!(
-        "set pindirs, 1",
-        ".wrap_target",
-        "set pins, 0 [31]",
-        "set pins, 1 [31]",
-        ".wrap",
-    );
-    let pio_program = pio_program.program;
     delay.delay_ms(1);
+
+    let pio_i2s_mclk_output = pio_file!("./src/i2s.pio", select_program("mclk_output"));
+    let pio_program = pio_i2s_mclk_output.program;
 
     // Initialize and start PIO
     let (mut pio, sm0, _, _, _) = pac.PIO0.split(&mut pac.RESETS);
     let installed = pio.install(&pio_program).unwrap();
     let (mut sm, _, _) = PIOBuilder::from_program(installed)
-        .set_pins(led_pin_id, 1)
+        .set_pins(MCLK_PIN_ID, 1)
         .clock_divisor_fixed_point(PIO_CLOCKDIV_INT, PIO_CLOCKDIV_FRAC)
         .build(sm0);
     // The GPIO pin needs to be configured as an output.
-    sm.set_pindirs([(led_pin_id, bsp::hal::pio::PinDir::Output)]);
+    sm.set_pindirs([(MCLK_PIN_ID, bsp::hal::pio::PinDir::Output)]);
     sm.start();
 
     // PIO runs in background, independently from CPU
