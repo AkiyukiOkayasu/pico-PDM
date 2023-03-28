@@ -20,7 +20,7 @@ use bsp::hal::{
     clocks::{Clock, ClockSource, ClocksManager, InitError},
     gpio::FunctionPio0,
     pac,
-    pio::{PIOBuilder, PIOExt},
+    pio::{Buffers, PIOBuilder, PIOExt, PinDir, ShiftDirection},
     pll::{common_configs::PLL_USB_48MHZ, setup_pll_blocking},
     sio::Sio,
     watchdog::Watchdog,
@@ -149,26 +149,55 @@ fn main() -> ! {
     );
 
     // configure GPIO for PIO0.
-    let mclk_pin = pins.gpio18.into_mode::<FunctionPio0>();
+    let mclk_pin = pins.gpio8.into_mode::<FunctionPio0>();
+    let i2s_send_data_pin = pins.gpio9.into_mode::<FunctionPio0>();
+    let i2s_send_sclk_pin = pins.gpio10.into_mode::<FunctionPio0>();
+    let i2s_send_lrclk_pin = pins.gpio11.into_mode::<FunctionPio0>();
 
     delay.delay_ms(1);
 
-    let pio_i2s_mclk_output = pio_file!("./src/i2s.pio", select_program("mclk_output"));
-    let pio_program = pio_i2s_mclk_output.program;
+    let pio_i2s_mclk_output = pio_file!("./src/i2s.pio", select_program("mclk_output")).program;
+    let pio_i2s_send_master = pio_file!("./src/i2s.pio", select_program("i2s_send_master")).program;
 
     // Initialize and start PIO
-    let (mut pio, sm0, _, _, _) = pac.PIO0.split(&mut pac.RESETS);
-    let installed = pio.install(&pio_program).unwrap();
-    let (mut sm, _, _) = PIOBuilder::from_program(installed)
+    let (mut pio, sm0, sm1, _sm2, _sm3) = pac.PIO0.split(&mut pac.RESETS);
+    let pio_i2s_mclk_output = pio.install(&pio_i2s_mclk_output).unwrap();
+    let pio_i2s_send_master = pio.install(&pio_i2s_send_master).unwrap();
+
+    let (mut sm0, _rx0, _tx0) = PIOBuilder::from_program(pio_i2s_mclk_output)
         .set_pins(mclk_pin.id().num, 1)
         .clock_divisor_fixed_point(PIO_CLOCKDIV_INT, PIO_CLOCKDIV_FRAC)
         .build(sm0);
+
+    let (mut sm1, _rx1, mut tx1) = PIOBuilder::from_program(pio_i2s_send_master)
+        .set_pins(i2s_send_data_pin.id().num, 1)
+        .side_set_pin_base(i2s_send_sclk_pin.id().num)
+        .clock_divisor_fixed_point(PIO_CLOCKDIV_INT, PIO_CLOCKDIV_FRAC)
+        .out_shift_direction(ShiftDirection::Left) //左シフト I2SはMSB first
+        .autopull(false) // No Auto Pull
+        .pull_threshold(32u8) //32bit bit depth LSB側が0埋めされた24bit, 16bitでも可
+        .buffers(Buffers::OnlyTx) // Rx FIFOは使わないので、その分をTx FIFOにjoin
+        .build(sm1);
+
     // The GPIO pin needs to be configured as an output.
-    sm.set_pindirs([(mclk_pin.id().num, bsp::hal::pio::PinDir::Output)]);
-    sm.start();
+    sm0.set_pindirs([(mclk_pin.id().num, PinDir::Output)]);
+    sm0.start();
+    sm1.set_pindirs([
+        (i2s_send_data_pin.id().num, PinDir::Output),
+        (i2s_send_lrclk_pin.id().num, PinDir::Output),
+        (i2s_send_sclk_pin.id().num, PinDir::Output),
+    ]);
+    // Tx FIFOを0埋め
+    tx1.write(12345u32);
+    tx1.write(12345u32);
+    tx1.write(12345u32);
+    tx1.write(12345u32);
+    sm1.start();
 
     // PIO runs in background, independently from CPU
     loop {
-        cortex_m::asm::wfi();
+        if !tx1.is_full() {
+            tx1.write(12345u32);
+        }
     }
 }
