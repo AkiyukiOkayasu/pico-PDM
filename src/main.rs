@@ -141,20 +141,6 @@ fn main() -> ! {
 
     let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
 
-    // let pins = bsp::Pins::new(
-    //     pac.IO_BANK0,
-    //     pac.PADS_BANK0,
-    //     sio.gpio_bank0,
-    //     &mut pac.RESETS,
-    // );
-
-    // // This is the correct pin on the Raspberry Pico board. On other boards, even if they have an
-    // // on-board LED, it might need to be changed.
-    // // Notably, on the Pico W, the LED is not connected to any of the RP2040 GPIOs but to the cyw43 module instead. If you have
-    // // a Pico W and want to toggle a LED with a simple GPIO output pin, you can connect an external
-    // // LED to one of the GPIO pins, and reference that pin here.
-    // let mut led_pin = pins.led.into_push_pull_output();
-
     let pins = bsp::hal::gpio::Pins::new(
         pac.IO_BANK0,
         pac.PADS_BANK0,
