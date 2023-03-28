@@ -190,6 +190,7 @@ fn main() -> ! {
 
     // PIO runs in background, independently from CPU
     loop {
+        delay.delay_ms(1);
         cortex_m::asm::wfi();
     }
 }
