@@ -162,6 +162,7 @@ fn main() -> ! {
         ".wrap",
     );
     let pio_program = pio_program.program;
+    delay.delay_ms(1);
 
     // Initialize and start PIO
     let (mut pio, sm0, _, _, _) = pac.PIO0.split(&mut pac.RESETS);
@@ -176,7 +177,6 @@ fn main() -> ! {
 
     // PIO runs in background, independently from CPU
     loop {
-        delay.delay_ms(1);
         cortex_m::asm::wfi();
     }
 }
