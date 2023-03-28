@@ -32,8 +32,8 @@ mod rp2040_pll_settings_for_48khz_audio;
 /// External high-speed crystal on the pico board is 12Mhz
 const EXTERNAL_XTAL_FREQ_HZ: HertzU32 = HertzU32::from_raw(12_000_000u32);
 
-/// RP2040の動作周波数 76.8MHz
-const RP2040_CLOCK_HZ: HertzU32 = HertzU32::from_raw(76_800_000u32);
+/// RP2040の動作周波数
+const RP2040_CLOCK_HZ: HertzU32 = HertzU32::from_raw(153_600_000u32);
 
 /// PIOの動作周波数 15.36MHz(48kHz*64*5) I2SのMCLKをPIOで作るので48kHzの整数倍にする
 const PIO_CLOCK_HZ: HertzU32 = HertzU32::from_raw(15_360_000u32);
