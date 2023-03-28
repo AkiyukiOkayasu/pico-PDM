@@ -149,9 +149,7 @@ fn main() -> ! {
     );
 
     // configure GPIO for PIO0.
-    let _mclk = pins.gpio18.into_mode::<FunctionPio0>();
-    // PIN id for use inside of PIO
-    const MCLK_PIN_ID: u8 = 18u8; //output
+    let mclk_pin = pins.gpio18.into_mode::<FunctionPio0>();
 
     delay.delay_ms(1);
 
@@ -162,11 +160,11 @@ fn main() -> ! {
     let (mut pio, sm0, _, _, _) = pac.PIO0.split(&mut pac.RESETS);
     let installed = pio.install(&pio_program).unwrap();
     let (mut sm, _, _) = PIOBuilder::from_program(installed)
-        .set_pins(MCLK_PIN_ID, 1)
+        .set_pins(mclk_pin.id().num, 1)
         .clock_divisor_fixed_point(PIO_CLOCKDIV_INT, PIO_CLOCKDIV_FRAC)
         .build(sm0);
     // The GPIO pin needs to be configured as an output.
-    sm.set_pindirs([(MCLK_PIN_ID, bsp::hal::pio::PinDir::Output)]);
+    sm.set_pindirs([(mclk_pin.id().num, bsp::hal::pio::PinDir::Output)]);
     sm.start();
 
     // PIO runs in background, independently from CPU
