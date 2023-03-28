@@ -170,7 +170,7 @@ fn main() -> ! {
         .build(sm0);
 
     let (mut sm1, _rx1, mut tx1) = PIOBuilder::from_program(pio_i2s_send_master)
-        .set_pins(i2s_send_data_pin.id().num, 1)
+        .out_pins(i2s_send_data_pin.id().num, 1)
         .side_set_pin_base(i2s_send_sclk_pin.id().num)
         .clock_divisor_fixed_point(PIO_CLOCKDIV_INT, PIO_CLOCKDIV_FRAC)
         .out_shift_direction(ShiftDirection::Left) //左シフト I2SはMSB first
