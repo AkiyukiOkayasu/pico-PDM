@@ -38,9 +38,11 @@ const RP2040_CLOCK_HZ: HertzU32 = HertzU32::from_raw(153_600_000u32);
 /// PIOの動作周波数 15.36MHz(48kHz*64*5) I2SのMCLKをPIOで作るので48kHzの整数倍にする
 const PIO_CLOCK_HZ: HertzU32 = HertzU32::from_raw(15_360_000u32);
 
-/// PIOの分周比率 15=RP2040動作周波数/PIO動作周波数
-const PIO_CLOCKDIV_INT: u32 = RP2040_CLOCK_HZ.raw() / PIO_CLOCK_HZ.raw();
-
+/// PIOの分周比率の整数部分 RP2040動作周波数/PIO動作周波数
+/// int + (frac/256)で分周する
+const PIO_CLOCKDIV_INT: u16 = (RP2040_CLOCK_HZ.raw() / PIO_CLOCK_HZ.raw()) as u16;
+/// PIOの分周比率の少数部分 Jitterを最小にするには0にするべき
+const PIO_CLOCKDIV_FRAC: u8 = 0u8;
 
 #[entry]
 fn main() -> ! {
@@ -180,7 +182,7 @@ fn main() -> ! {
     let installed = pio.install(&pio_program).unwrap();
     let (mut sm, _, _) = PIOBuilder::from_program(installed)
         .set_pins(led_pin_id, 1)
-        .clock_divisor_fixed_point(0, 0)
+        .clock_divisor_fixed_point(PIO_CLOCKDIV_INT, PIO_CLOCKDIV_FRAC)
         .build(sm0);
     // The GPIO pin needs to be configured as an output.
     sm.set_pindirs([(led_pin_id, bsp::hal::pio::PinDir::Output)]);
