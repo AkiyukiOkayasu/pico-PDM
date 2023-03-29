@@ -24,8 +24,7 @@
 .side_set 2
 
             ;                  /----LRCLK
-            ;                  |/---BCLK            
-    ; set x, 0 side 0b00
+            ;                  |/---BCLK    
 .wrap_target
     pull                side 0b01
     set y, 30 [1]       side 0b01
@@ -40,7 +39,6 @@ loopRch:
     jmp y-- loopRch [2] side 0b11
     out pins, 1 [1]     side 0b00;LSB
 .wrap
-
 
 ; I2S receive
 ; Master
