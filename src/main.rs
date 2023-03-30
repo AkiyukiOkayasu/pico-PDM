@@ -140,7 +140,9 @@ fn main() -> ! {
         .unwrap();
 
     let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
+    delay.delay_ms(1); //不使用でエラーを出さないために適当に1ms delayさせているだけ。意味はない。
 
+    // ===============GPIO=================
     let pins = bsp::hal::gpio::Pins::new(
         pac.IO_BANK0,
         pac.PADS_BANK0,
@@ -148,13 +150,12 @@ fn main() -> ! {
         &mut pac.RESETS,
     );
 
+    //=================PIO=================
     // configure GPIO for PIO0.
     let mclk_pin = pins.gpio8.into_mode::<FunctionPio0>();
     let i2s_send_data_pin = pins.gpio9.into_mode::<FunctionPio0>();
     let i2s_send_sclk_pin = pins.gpio10.into_mode::<FunctionPio0>();
     let i2s_send_lrclk_pin = pins.gpio11.into_mode::<FunctionPio0>();
-
-    delay.delay_ms(1);
 
     let pio_i2s_mclk_output = pio_file!("./src/i2s.pio", select_program("mclk_output")).program;
     let pio_i2s_send_master_left =
