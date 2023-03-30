@@ -5,6 +5,7 @@
 #![no_main]
 
 use bsp::entry;
+use cortex_m::singleton;
 use defmt::*;
 use defmt_rtt as _;
 use fugit::HertzU32;
@@ -18,6 +19,7 @@ use rp_pico as bsp;
 
 use bsp::hal::{
     clocks::{Clock, ClockSource, ClocksManager, InitError},
+    dma::{double_buffer, single_buffer, DMAExt},
     gpio::FunctionPio0,
     pac,
     pio::{Buffers, PIOBuilder, PIOExt, PinDir, ShiftDirection},
@@ -204,6 +206,12 @@ fn main() -> ! {
     //sm2はside-setは使わない
     sm2.set_pindirs([(i2s_send_data_pin.id().num, PinDir::Output)]);
 
+    // ================DMA=================
+    let dma_channels = pac.DMA.split(&mut pac.RESETS);
+    let dma_buf = singleton!(: [u32; 4] = [0; 4]).unwrap(); //singleton! staticなバッファーを作る
+    let dma_config = single_buffer::Config::new(dma_channels.ch0, dma_buf, tx1);
+
+    // Start PIO
     let sm_group_i2s_send = sm1.with(sm2);
     sm_group_i2s_send.start();
 
