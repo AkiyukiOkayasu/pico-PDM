@@ -203,26 +203,10 @@ fn main() -> ! {
     ]);
     //sm2はside-setは使わない
     sm2.set_pindirs([(i2s_send_data_pin.id().num, PinDir::Output)]);
-    // Tx FIFOを0埋め
-    tx1.write(12345u32);
-    tx1.write(12345u32);
-    tx1.write(12345u32);
-    tx1.write(12345u32);
-    tx2.write(123u32);
-    tx2.write(123u32);
-    tx2.write(123u32);
-    tx2.write(123u32);
 
     let sm_group_i2s_send = sm1.with(sm2);
     sm_group_i2s_send.start();
 
     // PIO runs in background, independently from CPU
-    loop {
-        if !tx1.is_full() {
-            tx1.write(12345u32); //Lch
-        }
-        if !tx2.is_full() {
-            tx2.write(123u32); //Rch
-        }
-    }
+    loop {}
 }
