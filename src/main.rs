@@ -5,7 +5,7 @@
 #![no_main]
 
 use bsp::entry;
-use cortex_m::{asm::wfi, singleton};
+use cortex_m::singleton;
 use defmt::*;
 use defmt_rtt as _;
 use fugit::HertzU32;
@@ -19,7 +19,7 @@ use rp_pico as bsp;
 
 use bsp::hal::{
     clocks::{Clock, ClockSource, ClocksManager, InitError},
-    dma::{double_buffer, single_buffer, DMAExt},
+    dma::{double_buffer, DMAExt},
     gpio::FunctionPio0,
     pac,
     pio::{Buffers, PIOBuilder, PIOExt, PinDir, ShiftDirection},
@@ -195,15 +195,21 @@ fn main() -> ! {
     ]);
 
     // ================DMA=================
+    // tx_buf1とtx_buf2でダブルバッファリングしてI2SのPIOのFIFOへ転送する
     let dma_channels = pac.DMA.split(&mut pac.RESETS);
-    let dma_buf = singleton!(: [u32; 8] = [12345; 8]).unwrap(); //singleton! staticなバッファーを作る SM1のRxFIFOはTxFIFOにjoinしたので、32bit*8の長さ
-    let dma_config = single_buffer::Config::new(dma_channels.ch0, dma_buf, tx1);
+    let tx_buf1 = singleton!(: [u32; 8] = [12345; 8]).unwrap(); //singleton! staticなバッファーを作る SM1のRxFIFOはTxFIFOにjoinしたので、32bit*8の長さ
+    let tx_buf2 = singleton!(: [u32; 8] = [123; 8]).unwrap(); //singleton! staticなバッファーを作る SM1のRxFIFOはTxFIFOにjoinしたので、32bit*8の長さ
+    let dma_config = double_buffer::Config::new((dma_channels.ch0, dma_channels.ch1), tx_buf1, tx1);
     let tx_transfer = dma_config.start(); //転送開始
-    let (ch0, tx_buf, tx) = tx_transfer.wait(); //転送終了までBlockingするっぽい
+    let mut tx_transfer = tx_transfer.read_next(tx_buf2);
 
     sm1.start(); // Start I2S PIO
 
     loop {
-        wfi();
+        // DMA転送が終わったら即座にもう片方のバッファーを転送する
+        if tx_transfer.is_done() {
+            let (tx_buf, next_tx_transfer) = tx_transfer.wait();
+            tx_transfer = next_tx_transfer.read_next(tx_buf);
+        }
     }
 }
