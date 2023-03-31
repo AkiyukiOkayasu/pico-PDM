@@ -65,81 +65,84 @@ fn main() -> ! {
 
     let mut clocks = ClocksManager::new(pac.CLOCKS);
 
-    // Configure PLLs
-    //                   REF     FBDIV VCO            POSTDIV
-    // PLL SYS: 12 / 1 = 12MHz * 125 = 1500MHZ / 6 / 2 = 125MHz
-    // PLL USB: 12 / 1 = 12MHz * 40  = 480 MHz / 5 / 2 =  48MHz
-    let pll_sys = setup_pll_blocking(
-        pac.PLL_SYS,
-        xosc.operating_frequency(),
-        rp2040_pll_settings_for_48khz_audio::SYS_PLL_CONFIG_153P6MHZ,
-        &mut clocks,
-        &mut pac.RESETS,
-    )
-    .map_err(InitError::PllError)
-    .ok()
-    .unwrap();
-
-    let pll_usb = setup_pll_blocking(
-        pac.PLL_USB,
-        xosc.operating_frequency(),
-        PLL_USB_48MHZ,
-        &mut clocks,
-        &mut pac.RESETS,
-    )
-    .map_err(InitError::PllError)
-    .ok()
-    .unwrap();
-
-    // Configure clocks
-    // CLK_REF = XOSC (12MHz) / 1 = 12MHz
-    clocks
-        .reference_clock
-        .configure_clock(&xosc, xosc.get_freq())
-        .map_err(InitError::ClockError)
+    // Configure PLL and clocks
+    {
+        // Configure PLLs
+        //                   REF     FBDIV VCO            POSTDIV
+        // PLL SYS: 12 / 1 = 12MHz * 125 = 1500MHZ / 6 / 2 = 125MHz
+        // PLL USB: 12 / 1 = 12MHz * 40  = 480 MHz / 5 / 2 =  48MHz
+        let pll_sys = setup_pll_blocking(
+            pac.PLL_SYS,
+            xosc.operating_frequency(),
+            rp2040_pll_settings_for_48khz_audio::SYS_PLL_CONFIG_153P6MHZ,
+            &mut clocks,
+            &mut pac.RESETS,
+        )
+        .map_err(InitError::PllError)
         .ok()
         .unwrap();
 
-    // CLK SYS = PLL SYS (125MHz) / 1 = 125MHz
-    clocks
-        .system_clock
-        .configure_clock(&pll_sys, pll_sys.get_freq())
-        .map_err(InitError::ClockError)
+        let pll_usb = setup_pll_blocking(
+            pac.PLL_USB,
+            xosc.operating_frequency(),
+            PLL_USB_48MHZ,
+            &mut clocks,
+            &mut pac.RESETS,
+        )
+        .map_err(InitError::PllError)
         .ok()
         .unwrap();
 
-    // CLK USB = PLL USB (48MHz) / 1 = 48MHz
-    clocks
-        .usb_clock
-        .configure_clock(&pll_usb, pll_usb.get_freq())
-        .map_err(InitError::ClockError)
-        .ok()
-        .unwrap();
+        // Configure clocks
+        // CLK_REF = XOSC (12MHz) / 1 = 12MHz
+        clocks
+            .reference_clock
+            .configure_clock(&xosc, xosc.get_freq())
+            .map_err(InitError::ClockError)
+            .ok()
+            .unwrap();
 
-    // CLK ADC = PLL USB (48MHZ) / 1 = 48MHz
-    clocks
-        .adc_clock
-        .configure_clock(&pll_usb, pll_usb.get_freq())
-        .map_err(InitError::ClockError)
-        .ok()
-        .unwrap();
+        // CLK SYS = PLL SYS (125MHz) / 1 = 125MHz
+        clocks
+            .system_clock
+            .configure_clock(&pll_sys, pll_sys.get_freq())
+            .map_err(InitError::ClockError)
+            .ok()
+            .unwrap();
 
-    // CLK RTC = PLL USB (48MHz) / 1024 = 46875Hz
-    clocks
-        .rtc_clock
-        .configure_clock(&pll_usb, HertzU32::from_raw(46875u32))
-        .map_err(InitError::ClockError)
-        .ok()
-        .unwrap();
+        // CLK USB = PLL USB (48MHz) / 1 = 48MHz
+        clocks
+            .usb_clock
+            .configure_clock(&pll_usb, pll_usb.get_freq())
+            .map_err(InitError::ClockError)
+            .ok()
+            .unwrap();
 
-    // CLK PERI = clk_sys. Used as reference clock for Peripherals. No dividers so just select and enable
-    // Normally choose clk_sys or clk_usb
-    clocks
-        .peripheral_clock
-        .configure_clock(&clocks.system_clock, clocks.system_clock.freq())
-        .map_err(InitError::ClockError)
-        .ok()
-        .unwrap();
+        // CLK ADC = PLL USB (48MHZ) / 1 = 48MHz
+        clocks
+            .adc_clock
+            .configure_clock(&pll_usb, pll_usb.get_freq())
+            .map_err(InitError::ClockError)
+            .ok()
+            .unwrap();
+
+        // CLK RTC = PLL USB (48MHz) / 1024 = 46875Hz
+        clocks
+            .rtc_clock
+            .configure_clock(&pll_usb, HertzU32::from_raw(46875u32))
+            .map_err(InitError::ClockError)
+            .ok()
+            .unwrap();
+
+        // CLK PERI = clk_sys. Used as reference clock for Peripherals. No dividers so just select and enable
+        // Normally choose clk_sys or clk_usb
+        clocks
+            .peripheral_clock
+            .configure_clock(&clocks.system_clock, clocks.system_clock.freq())
+            .map_err(InitError::ClockError)
+            .ok()
+            .unwrap();
+    }
 
     let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
     delay.delay_ms(1); //不使用でエラーを出さないために適当に1ms delayさせているだけ。意味はない。
