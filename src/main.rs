@@ -187,14 +187,12 @@ fn main() -> ! {
 
     // The GPIO pin needs to be configured as an output.
     sm0.set_pindirs([(mclk_pin.id().num, PinDir::Output)]);
-    sm0.start();
+    sm0.start(); // Start MCLK PIO (MCLKの位相はI2Sと合う必要はないので適当なタイミングでスタートして良い)。
     sm1.set_pindirs([
         (i2s_send_data_pin.id().num, PinDir::Output),
         (i2s_send_lrclk_pin.id().num, PinDir::Output),
         (i2s_send_sclk_pin.id().num, PinDir::Output),
     ]);
-
-    info!("DMA config begin");
 
     // ================DMA=================
     let dma_channels = pac.DMA.split(&mut pac.RESETS);
@@ -203,12 +201,8 @@ fn main() -> ! {
     let tx_transfer = dma_config.start(); //転送開始
     let (ch0, tx_buf, tx) = tx_transfer.wait(); //転送終了までBlockingするっぽい
 
-    info!("DMA config end");
+    sm1.start(); // Start I2S PIO
 
-    // Start PIO
-    sm1.start();
-
-    // PIO runs in background, independently from CPU
     loop {
         wfi();
     }
