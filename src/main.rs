@@ -184,8 +184,8 @@ fn main() -> ! {
         .side_set_pin_base(i2s_send_sclk_pin.id().num)
         .clock_divisor_fixed_point(PIO_CLOCKDIV_INT, PIO_CLOCKDIV_FRAC)
         .out_shift_direction(ShiftDirection::Left) //左シフト I2SはMSB first
-        .autopull(false) // No Auto Pull
         .pull_threshold(32u8) //32bit bit depth LSB側が0埋めされた24bit, 16bitでも可
+        .autopull(true)
         .buffers(Buffers::OnlyTx) // Rx FIFOは使わないので、その分をTx FIFOにjoin
         .build(sm1);
 
