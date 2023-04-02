@@ -208,8 +208,26 @@ fn main() -> ! {
     loop {
         // DMA転送が終わったら即座にもう片方のバッファーを転送する
         if tx_transfer.is_done() {
-            let (tx_buf, next_tx_transfer) = tx_transfer.wait();
-            tx_transfer = next_tx_transfer.read_next(tx_buf);
+            let (next_tx_buf, next_tx_transfer) = tx_transfer.wait();
+
+            // 信号処理的な
+            for e in next_tx_buf.iter_mut() {
+                *e += 1u32;
+                if *e == 65536 {
+                    *e = 0;
+                }
+            }
+            // 適当に負荷かけてみる
+            for _ in 0..100 {
+                cortex_m::asm::nop();
+                cortex_m::asm::nop();
+                cortex_m::asm::nop();
+                cortex_m::asm::nop();
+                cortex_m::asm::nop();
+            }
+
+            // info!("{:?}", next_tx_buf[0]);
+            tx_transfer = next_tx_transfer.read_next(next_tx_buf);
         }
     }
 }
