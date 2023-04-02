@@ -202,7 +202,6 @@ fn main() -> ! {
     let dma_config = double_buffer::Config::new((dma_channels.ch0, dma_channels.ch1), tx_buf1, tx1);
     let tx_transfer = dma_config.start(); //転送開始
     let mut tx_transfer = tx_transfer.read_next(tx_buf2);
-
     sm1.start(); // Start I2S PIO
 
     loop {
@@ -225,8 +224,6 @@ fn main() -> ! {
                 cortex_m::asm::nop();
                 cortex_m::asm::nop();
             }
-
-            // info!("{:?}", next_tx_buf[0]);
             tx_transfer = next_tx_transfer.read_next(next_tx_buf);
         }
     }
