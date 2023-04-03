@@ -210,14 +210,15 @@ fn main() -> ! {
             let (next_tx_buf, next_tx_transfer) = tx_transfer.wait();
 
             // 信号処理的な
-            for e in next_tx_buf.iter_mut() {
-                *e += 1u32;
-                if *e == 65536 {
-                    *e = 0;
-                }
-            }
+            // for e in next_tx_buf.iter_mut() {
+            //     *e += 1u32;
+            //     if *e == 65536 {
+            //         *e = 0;
+            //     }
+            // }
+
             // 適当に負荷かけてみる
-            for _ in 0..100 {
+            for _ in 0..380 {
                 cortex_m::asm::nop();
                 cortex_m::asm::nop();
                 cortex_m::asm::nop();
