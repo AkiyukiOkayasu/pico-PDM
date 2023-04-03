@@ -197,8 +197,8 @@ fn main() -> ! {
     // ================DMA=================
     // tx_buf1とtx_buf2でダブルバッファリングしてI2SのPIOのFIFOへ転送する
     let dma_channels = pac.DMA.split(&mut pac.RESETS);
-    let tx_buf1 = singleton!(: [u32; 8] = [12345; 8]).unwrap(); //singleton! staticなバッファーを作る SM1のRxFIFOはTxFIFOにjoinしたので、32bit*8の長さ
-    let tx_buf2 = singleton!(: [u32; 8] = [123; 8]).unwrap(); //singleton! staticなバッファーを作る SM1のRxFIFOはTxFIFOにjoinしたので、32bit*8の長さ
+    let tx_buf1 = singleton!(: [u32; 32] = [12345; 32]).unwrap(); //singleton! staticなバッファーを作る SM1のRxFIFOはTxFIFOにjoinしたので、32bit*8の長さ
+    let tx_buf2 = singleton!(: [u32; 32] = [123; 32]).unwrap(); //singleton! staticなバッファーを作る SM1のRxFIFOはTxFIFOにjoinしたので、32bit*8の長さ
     let dma_config = double_buffer::Config::new((dma_channels.ch0, dma_channels.ch1), tx_buf1, tx1);
     let tx_transfer = dma_config.start(); //転送開始
     let mut tx_transfer = tx_transfer.read_next(tx_buf2);
@@ -218,7 +218,7 @@ fn main() -> ! {
             // }
 
             // 適当に負荷かけてみる
-            for _ in 0..380 {
+            for _ in 0..1550 {
                 cortex_m::asm::nop();
                 cortex_m::asm::nop();
                 cortex_m::asm::nop();
