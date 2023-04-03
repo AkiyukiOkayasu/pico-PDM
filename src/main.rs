@@ -206,7 +206,7 @@ fn main() -> ! {
             tx1.write(12u32);
 
             // 適当に負荷かけてみる
-            for _ in 0..90 {
+            for _ in 0..96 {
                 cortex_m::asm::nop();
                 cortex_m::asm::nop();
                 cortex_m::asm::nop();
