@@ -7,11 +7,11 @@
 ; Akiyuki Okayasu
 
 .program pdm_stereo
-.side_set 1 opt
+.side_set 1
 
-.wrap_target
-    nop [1]    side 0b0
-    nop [1]    side 0b1;in命令の前に1clock分マージンを入れる
-    in pins, 1 side 0b1
-    nop [1]    side 0b0
+.wrap_target    
+    nop [1]    side 0b0; in命令の前に1clock分マージンを入れる
+    in pins, 1 side 0b0; Lch    
+    nop [1]    side 0b1; in命令の前に1clock分マージンを入れる
+    in pins, 1 side 0b1; Rch
 .wrap
