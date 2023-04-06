@@ -38,63 +38,6 @@ loopRch:
     out pins, 1 [1]     side 0b00;LSB
 .wrap
 
-; I2S send Lch
-; I2S Master
-; Tx (Left channel only)
-; i2s_send_master_rightと同期して同時使用しなければならない
-; fs: 48kHz
-; sysClk: 153.6MHz
-; PIO Clock freq: 15.36MHz (320fs)
-; Bit depth: 32bit
-; Akiyuki Okayasu
-
-.program i2s_send_master_left
-.side_set 2
-
-            ;                  /----LRCLK
-            ;                  |/---BCLK    
-.wrap_target
-    pull                side 0b01
-    set y, 30 [1]       side 0b01
-loopLch:
-    out pins, 1 [1]     side 0b00;MSBからLSBの1つ前まで
-    jmp y-- loopLch [2] side 0b01
-    out pins, 1 [1]     side 0b10;LSB
-    nop                 side 0b11
-    set y, 30 [1]       side 0b11
-loopRch:
-    nop [1]             side 0b10;MSBからLSBの1つ前まで
-    jmp y-- loopRch [2] side 0b11
-    nop [1]             side 0b00;LSB
-.wrap
-
-; I2S send Rch
-; I2S Master
-; Tx (Right channel only)
-; i2s_send_master_leftと同期して同時使用しなければならない
-; fs: 48kHz
-; sysClk: 153.6MHz
-; PIO Clock freq: 15.36MHz (320fs)
-; Bit depth: 32bit
-; Akiyuki Okayasu
-
-.program i2s_send_master_right
-            
-.wrap_target
-    nop
-    set y, 30 [1]
-loopLch:
-    nop [1]
-    jmp y-- loopLch [2]
-    out pins, 1 [1]
-    pull
-    set y, 30 [1]
-loopRch:
-    out pins, 1 [1];MSBからLSBの1つ前まで
-    jmp y-- loopRch [2]
-    out pins, 1 [1];LSB
-.wrap
-
 ; I2S receive
 ; Master
 ; fs: 48kHz
