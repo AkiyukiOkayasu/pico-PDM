@@ -192,6 +192,7 @@ fn main() -> ! {
     let (mut sm2, rx2, _tx1) = PIOBuilder::from_program(pio_pdm)
         .in_pin_base(pdm_input_pin.id().num)
         .side_set_pin_base(pdm_clock_output_pin.id().num)
+        .clock_divisor_fixed_point(PIO_CLOCKDIV_INT, PIO_CLOCKDIV_FRAC)
         .in_shift_direction(ShiftDirection::Left) //左シフト
         .autopush(true)
         .push_threshold(32u8) //Bit-depth: 32bit
@@ -216,17 +217,20 @@ fn main() -> ! {
     let dma_channels = pac.DMA.split(&mut pac.RESETS);
     let i2s_tx_buf1 = singleton!(: [u32; 8] = [12345; 8]).unwrap(); //staticなバッファーを作る
     let i2s_tx_buf2 = singleton!(: [u32; 8] = [123; 8]).unwrap(); //staticなバッファーを作る
-    let dma_config =
+    let i2s_dma_config =
         double_buffer::Config::new((dma_channels.ch0, dma_channels.ch1), i2s_tx_buf1, tx1);
-    let tx_transfer = dma_config.start(); //転送開始
-    let mut tx_transfer = tx_transfer.read_next(i2s_tx_buf2);
+    let i2s_tx_transfer = i2s_dma_config.start(); //転送開始
+    let mut i2s_tx_transfer = i2s_tx_transfer.read_next(i2s_tx_buf2);
 
     sm1.start(); // Start I2S PIO
+    let pdm_rx_buf1 = singleton!(: [u32; 8] = [0; 8]).unwrap(); //staticなバッファーを作る
+    let pdm_rx_buf1 = singleton!(: [u32; 8] = [0; 8]).unwrap(); //staticなバッファーを作る
+    let pdm_dma_config = sm1.start(); // Start I2S PIO
 
     loop {
-        // DMA転送が終わったら即座にもう片方のバッファーを転送する
-        if tx_transfer.is_done() {
-            let (next_tx_buf, next_tx_transfer) = tx_transfer.wait();
+        // I2SのDMA転送が終わったら即座にもう片方のバッファーを転送する
+        if i2s_tx_transfer.is_done() {
+            let (next_tx_buf, next_tx_transfer) = i2s_tx_transfer.wait();
 
             // 信号処理的な
             // for e in next_tx_buf.iter_mut() {
@@ -244,7 +248,7 @@ fn main() -> ! {
                 cortex_m::asm::nop();
                 cortex_m::asm::nop();
             }
-            tx_transfer = next_tx_transfer.read_next(next_tx_buf);
+            i2s_tx_transfer = next_tx_transfer.read_next(next_tx_buf);
         }
     }
 }
