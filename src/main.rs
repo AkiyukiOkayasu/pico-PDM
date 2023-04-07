@@ -281,12 +281,12 @@ fn main() -> ! {
 
             for (i, e) in rx_buf.iter_mut().enumerate() {
                 let l = *e & 0b0101_0101_0101_0101_0101_0101_0101_0101; //Lchのみマスク
-                let l_ones = l.count_ones() as i32; // PDMがpositiveのときは1、negativeのときは0
-                let l_zeros = 16i32 - l_ones;
+                let l_ones = l.count_ones() as i32; // PDMがpositiveのときの回数
+                let l_zeros = 16i32 - l_ones; // PDMがnegativeのときの回数
                 l_pdm += l_ones - l_zeros;
                 let r = *e & 0b1010_1010_1010_1010_1010_1010_1010_1010; //Rchのみマスク
-                let r_ones = r.count_ones() as i32; // PDMがpositiveのときは1、negativeのときは0
-                let r_zeros = 16i32 - r_ones;
+                let r_ones = r.count_ones() as i32; // PDMがpositiveのときの回数
+                let r_zeros = 16i32 - r_ones; // PDMがnegativeのときの回数
                 r_pdm += r_ones - r_zeros;
 
                 if i % 4 == 0 {
