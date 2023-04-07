@@ -9,6 +9,7 @@ use cortex_m::singleton;
 use defmt::*;
 use defmt_rtt as _;
 use fugit::HertzU32;
+use heapless::spsc::Queue;
 use panic_probe as _;
 use pio_proc::pio_file;
 
@@ -237,23 +238,66 @@ fn main() -> ! {
     let sm_group_i2s_pdm = sm1.with(sm2); //I2SとPDMのPIOを同時にスタートさせるためにグループ化する
     sm_group_i2s_pdm.start(); // Start I2S and PDM PIO
 
+    let mut l_pdm = 0i32; //PDMの積分値 Lch
+    let mut r_pdm = 0i32; //PDMの積分値 Rch
+    let mut l_pdm_queue: Queue<i32, 64> = Queue::new();
+    let mut r_pdm_queue: Queue<i32, 64> = Queue::new();
+
+    //PDM Queueの初期化
+    {
+        for _ in 0..BUFFER_SIZE {
+            l_pdm_queue.enqueue(0i32).unwrap();
+            r_pdm_queue.enqueue(0i32).unwrap();
+        }
+    }
+
     loop {
         // I2SのDMA転送が終わったら即座にもう片方のバッファーを転送する
         if i2s_tx_transfer.is_done() {
             let (next_tx_buf, next_tx_transfer) = i2s_tx_transfer.wait();
 
+            // info!("I2S DMA done");
+
             // 信号処理的な
-            // for e in next_tx_buf.iter_mut() {
-            //     *e += 1u32;
-            //     if *e == 65536 {
-            //         *e = 0;
-            //     }
-            // }
+            for (i, e) in next_tx_buf.iter_mut().enumerate() {
+                if i % 2 == 0 {
+                    //Lch
+                    l_pdm = l_pdm_queue.dequeue().unwrap();
+                    *e = l_pdm as u32;
+                } else {
+                    //Rch
+                    r_pdm = r_pdm_queue.dequeue().unwrap();
+                    *e = r_pdm as u32;
+                }
+            }
+
             i2s_tx_transfer = next_tx_transfer.read_next(next_tx_buf);
         }
 
         if pdm_rx_transfer.is_done() {
             let (rx_buf, next_rx_transfer) = pdm_rx_transfer.wait();
+
+            // info!("PDM DMA done");
+
+            for (i, e) in rx_buf.iter_mut().enumerate() {
+                let l = *e & 0b0101_0101_0101_0101_0101_0101_0101_0101; //Lchのみマスク
+                let l_ones = l.count_ones() as i32; // PDMがpositiveのときは1、negativeのときは0
+                let l_zeros = 16i32 - l_ones;
+                l_pdm += l_ones - l_zeros;
+                let r = *e & 0b1010_1010_1010_1010_1010_1010_1010_1010; //Rchのみマスク
+                let r_ones = r.count_ones() as i32; // PDMがpositiveのときは1、negativeのときは0
+                let r_zeros = 16i32 - r_ones;
+                r_pdm += r_ones - r_zeros;
+
+                if i % 4 == 0 {
+                    // PDMは192kHzの周期で更新されるので4回に1回だけQueueに積むことで48kHzにする
+                    //Lch
+                    l_pdm_queue.enqueue(l_pdm).unwrap();
+                    //Rch
+                    r_pdm_queue.enqueue(r_pdm).unwrap();
+                }
+            }
+
             pdm_rx_transfer = next_rx_transfer.write_next(rx_buf);
         }
     }
