@@ -239,15 +239,6 @@ fn main() -> ! {
             //         *e = 0;
             //     }
             // }
-
-            // 適当に負荷かけてみる 96.875ループ/サンプル
-            for _ in 0..1550 {
-                cortex_m::asm::nop();
-                cortex_m::asm::nop();
-                cortex_m::asm::nop();
-                cortex_m::asm::nop();
-                cortex_m::asm::nop();
-            }
             i2s_tx_transfer = next_tx_transfer.read_next(next_tx_buf);
         }
     }
