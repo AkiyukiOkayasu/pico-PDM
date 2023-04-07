@@ -46,6 +46,9 @@ const PIO_CLOCKDIV_INT: u16 = (RP2040_CLOCK_HZ.raw() / PIO_CLOCK_HZ.raw()) as u1
 /// PIOの分周比率の少数部分 Jitterを最小にするには0にするべき
 const PIO_CLOCKDIV_FRAC: u8 = 0u8;
 
+/// バッファーサイズ（サンプル）
+const BUFFER_SIZE: usize = 16;
+
 #[entry]
 fn main() -> ! {
     info!("Program start");
@@ -216,8 +219,8 @@ fn main() -> ! {
     // I2S用DMA設定
     // tx_buf1とtx_buf2でダブルバッファリングしてI2SのPIOのFIFOへ転送する
     let dma_channels = pac.DMA.split(&mut pac.RESETS);
-    let i2s_tx_buf1 = singleton!(: [u32; 8] = [12345; 8]).unwrap(); //staticなバッファーを作る
-    let i2s_tx_buf2 = singleton!(: [u32; 8] = [123; 8]).unwrap(); //staticなバッファーを作る
+    let i2s_tx_buf1 = singleton!(: [u32; BUFFER_SIZE*2] = [12345; BUFFER_SIZE*2]).unwrap(); //staticなバッファーを作る
+    let i2s_tx_buf2 = singleton!(: [u32; BUFFER_SIZE*2] = [123; BUFFER_SIZE*2]).unwrap(); //staticなバッファーを作る
     let i2s_dma_config =
         double_buffer::Config::new((dma_channels.ch0, dma_channels.ch1), i2s_tx_buf1, tx1);
     let i2s_tx_transfer = i2s_dma_config.start(); //転送開始
