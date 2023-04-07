@@ -8,6 +8,7 @@ use bsp::entry;
 use cortex_m::singleton;
 use defmt::*;
 use defmt_rtt as _;
+use fixed::types::I1F31;
 use fugit::HertzU32;
 use heapless::spsc::Queue;
 use panic_probe as _;
@@ -49,6 +50,7 @@ const PIO_CLOCKDIV_FRAC: u8 = 0u8;
 
 /// バッファーサイズ（サンプル）
 const BUFFER_SIZE: usize = 16;
+const PDM_QUEUE_SIZE: usize = BUFFER_SIZE * 2;
 
 #[entry]
 fn main() -> ! {
@@ -228,8 +230,8 @@ fn main() -> ! {
     let mut i2s_tx_transfer = i2s_tx_transfer.read_next(i2s_tx_buf2);
 
     // PDM用DMA設定
-    let pdm_rx_buf1 = singleton!(: [u32; 8] = [0; 8]).unwrap(); //staticなバッファーを作る
-    let pdm_rx_buf2 = singleton!(: [u32; 8] = [0; 8]).unwrap(); //staticなバッファーを作る
+    let pdm_rx_buf1 = singleton!(: [u32; 16] = [0; 16]).unwrap(); //staticなバッファーを作る
+    let pdm_rx_buf2 = singleton!(: [u32; 16] = [0; 16]).unwrap(); //staticなバッファーを作る
     let pdm_dma_config =
         double_buffer::Config::new((dma_channels.ch2, dma_channels.ch3), rx2, pdm_rx_buf1);
     let pdm_rx_transfer = pdm_dma_config.start(); //転送開始
@@ -238,16 +240,16 @@ fn main() -> ! {
     let sm_group_i2s_pdm = sm1.with(sm2); //I2SとPDMのPIOを同時にスタートさせるためにグループ化する
     sm_group_i2s_pdm.start(); // Start I2S and PDM PIO
 
-    let mut l_pdm = 0i32; //PDMの積分値 Lch
-    let mut r_pdm = 0i32; //PDMの積分値 Rch
-    let mut l_pdm_queue: Queue<i32, 64> = Queue::new();
-    let mut r_pdm_queue: Queue<i32, 64> = Queue::new();
+    let mut l_pdm = I1F31::ZERO; //PDMの左チャンネルの積分値
+    let mut r_pdm = I1F31::ZERO; //PDMの右チャンネルの積分値
+    let mut l_pdm_queue: Queue<I1F31, PDM_QUEUE_SIZE> = Queue::new();
+    let mut r_pdm_queue: Queue<I1F31, PDM_QUEUE_SIZE> = Queue::new();
 
     //PDM Queueの初期化
     {
         for _ in 0..BUFFER_SIZE {
-            l_pdm_queue.enqueue(0i32).unwrap();
-            r_pdm_queue.enqueue(0i32).unwrap();
+            l_pdm_queue.enqueue(I1F31::ZERO).unwrap();
+            r_pdm_queue.enqueue(I1F31::ZERO).unwrap();
         }
     }
 
@@ -263,11 +265,11 @@ fn main() -> ! {
                 if i % 2 == 0 {
                     //Lch
                     l_pdm = l_pdm_queue.dequeue().unwrap();
-                    *e = l_pdm as u32;
+                    *e = l_pdm.to_bits() as u32;
                 } else {
                     //Rch
                     r_pdm = r_pdm_queue.dequeue().unwrap();
-                    *e = r_pdm as u32;
+                    *e = r_pdm.to_bits() as u32;
                 }
             }
 
@@ -283,10 +285,14 @@ fn main() -> ! {
                 let l = *e & 0b0101_0101_0101_0101_0101_0101_0101_0101; //Lchのみマスク
                 let l_ones = l.count_ones() as i32; // PDMがpositiveのときの回数
                 let l_zeros = 16i32 - l_ones; // PDMがnegativeのときの回数
+                let l_ones = I1F31::from_bits(l_ones);
+                let l_zeros = I1F31::from_bits(l_zeros);
                 l_pdm += l_ones - l_zeros;
                 let r = *e & 0b1010_1010_1010_1010_1010_1010_1010_1010; //Rchのみマスク
                 let r_ones = r.count_ones() as i32; // PDMがpositiveのときの回数
                 let r_zeros = 16i32 - r_ones; // PDMがnegativeのときの回数
+                let r_ones = I1F31::from_bits(r_ones);
+                let r_zeros = I1F31::from_bits(r_zeros);
                 r_pdm += r_ones - r_zeros;
 
                 if i % 4 == 0 {
