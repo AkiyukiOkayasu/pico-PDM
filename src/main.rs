@@ -147,7 +147,7 @@ fn main() -> ! {
     let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
     delay.delay_ms(1); //不使用でワーニングを出さないために適当に1ms delayさせているだけ。意味はない。
 
-    // ===============GPIO=================
+    //=============================GPIO===============================
     let pins = bsp::hal::gpio::Pins::new(
         pac.IO_BANK0,
         pac.PADS_BANK0,
@@ -155,7 +155,7 @@ fn main() -> ! {
         &mut pac.RESETS,
     );
 
-    //=================PIO=================
+    //=============================PIO===============================
     // configure GPIO for PIO0.
     let mclk_pin = pins.gpio8.into_mode::<FunctionPio0>();
     let i2s_send_data_pin = pins.gpio9.into_mode::<FunctionPio0>();
@@ -194,7 +194,7 @@ fn main() -> ! {
         (i2s_send_sclk_pin.id().num, PinDir::Output),
     ]);
 
-    // ================DMA=================
+    //=============================DMA===============================
     // tx_buf1とtx_buf2でダブルバッファリングしてI2SのPIOのFIFOへ転送する
     let dma_channels = pac.DMA.split(&mut pac.RESETS);
     let tx_buf1 = singleton!(: [u32; 32] = [12345; 32]).unwrap(); //singleton! staticなバッファーを作る SM1のRxFIFOはTxFIFOにjoinしたので、32bit*8の長さ
