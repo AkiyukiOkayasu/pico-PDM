@@ -213,6 +213,7 @@ fn main() -> ! {
     ]);
 
     //=============================DMA===============================
+    // I2S用DMA設定
     // tx_buf1とtx_buf2でダブルバッファリングしてI2SのPIOのFIFOへ転送する
     let dma_channels = pac.DMA.split(&mut pac.RESETS);
     let i2s_tx_buf1 = singleton!(: [u32; 8] = [12345; 8]).unwrap(); //staticなバッファーを作る
