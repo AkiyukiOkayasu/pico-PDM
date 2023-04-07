@@ -161,14 +161,18 @@ fn main() -> ! {
     let i2s_send_data_pin = pins.gpio9.into_mode::<FunctionPio0>();
     let i2s_send_sclk_pin = pins.gpio10.into_mode::<FunctionPio0>();
     let i2s_send_lrclk_pin = pins.gpio11.into_mode::<FunctionPio0>();
+    let pdm_input_pin = pins.gpio12.into_mode::<FunctionPio0>();
+    let pdm_clock_output_pin = pins.gpio13.into_mode::<FunctionPio0>();
 
     let pio_i2s_mclk_output = pio_file!("./src/i2s.pio", select_program("mclk_output")).program;
     let pio_i2s_send_master = pio_file!("./src/i2s.pio", select_program("i2s_send_master")).program;
+    let pio_pdm = pio_file!("./src/pdm.pio", select_program("pdm_stereo")).program;
 
     // Initialize and start PIO
-    let (mut pio, sm0, sm1, _sm2, _sm3) = pac.PIO0.split(&mut pac.RESETS);
+    let (mut pio, sm0, sm1, sm2, _sm3) = pac.PIO0.split(&mut pac.RESETS);
     let pio_i2s_mclk_output = pio.install(&pio_i2s_mclk_output).unwrap();
     let pio_i2s_send_master = pio.install(&pio_i2s_send_master).unwrap();
+    let pio_pdm = pio.install(&pio_pdm).unwrap();
 
     let (mut sm0, _rx0, _tx0) = PIOBuilder::from_program(pio_i2s_mclk_output)
         .set_pins(mclk_pin.id().num, 1)
@@ -185,6 +189,15 @@ fn main() -> ! {
         .buffers(Buffers::OnlyTx) // Rx FIFOは使わないので、その分をTx FIFOにjoin
         .build(sm1);
 
+    let (mut sm2, rx2, _tx1) = PIOBuilder::from_program(pio_pdm)
+        .in_pin_base(pdm_input_pin.id().num)
+        .side_set_pin_base(pdm_clock_output_pin.id().num)
+        .in_shift_direction(ShiftDirection::Left) //左シフト
+        .autopush(true)
+        .push_threshold(32u8) //Bit-depth: 32bit
+        .buffers(Buffers::OnlyRx) // Tx FIFOは使わないので、その分をRx FIFOにjoin
+        .build(sm2);
+
     // The GPIO pin needs to be configured as an output.
     sm0.set_pindirs([(mclk_pin.id().num, PinDir::Output)]);
     sm0.start(); // Start MCLK PIO (MCLKの位相はI2Sと合う必要はないので適当なタイミングでスタートして良い)。
@@ -192,6 +205,10 @@ fn main() -> ! {
         (i2s_send_data_pin.id().num, PinDir::Output),
         (i2s_send_lrclk_pin.id().num, PinDir::Output),
         (i2s_send_sclk_pin.id().num, PinDir::Output),
+    ]);
+    sm2.set_pindirs([
+        (pdm_input_pin.id().num, PinDir::Input),
+        (pdm_clock_output_pin.id().num, PinDir::Output),
     ]);
 
     //=============================DMA===============================
