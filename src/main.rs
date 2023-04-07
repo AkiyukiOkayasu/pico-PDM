@@ -223,10 +223,16 @@ fn main() -> ! {
     let i2s_tx_transfer = i2s_dma_config.start(); //転送開始
     let mut i2s_tx_transfer = i2s_tx_transfer.read_next(i2s_tx_buf2);
 
-    sm1.start(); // Start I2S PIO
+    // PDM用DMA設定
     let pdm_rx_buf1 = singleton!(: [u32; 8] = [0; 8]).unwrap(); //staticなバッファーを作る
-    let pdm_rx_buf1 = singleton!(: [u32; 8] = [0; 8]).unwrap(); //staticなバッファーを作る
-    let pdm_dma_config = sm1.start(); // Start I2S PIO
+    let pdm_rx_buf2 = singleton!(: [u32; 8] = [0; 8]).unwrap(); //staticなバッファーを作る
+    let pdm_dma_config =
+        double_buffer::Config::new((dma_channels.ch2, dma_channels.ch3), rx2, pdm_rx_buf1);
+    let pdm_rx_transfer = pdm_dma_config.start(); //転送開始
+    let mut pdm_rx_transfer = pdm_rx_transfer.write_next(pdm_rx_buf2);
+
+    let sm_group_i2s_pdm = sm1.with(sm2); //I2SとPDMのPIOを同時にスタートさせるためにグループ化する
+    sm_group_i2s_pdm.start(); // Start I2S and PDM PIO
 
     loop {
         // I2SのDMA転送が終わったら即座にもう片方のバッファーを転送する
@@ -241,6 +247,11 @@ fn main() -> ! {
             //     }
             // }
             i2s_tx_transfer = next_tx_transfer.read_next(next_tx_buf);
+        }
+
+        if pdm_rx_transfer.is_done() {
+            let (rx_buf, next_rx_transfer) = pdm_rx_transfer.wait();
+            pdm_rx_transfer = next_rx_transfer.write_next(rx_buf);
         }
     }
 }
