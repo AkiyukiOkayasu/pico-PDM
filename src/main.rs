@@ -296,10 +296,10 @@ fn main() -> ! {
                 r_pdm += r_ones - r_zeros;
 
                 if i % 4 == 0 {
-                    // PDMは192kHzの周期で更新されるので4回に1回だけQueueに積むことで48kHzにする
-                    //Lch
+                    // 192kHz周期で積分するので4回に1回だけQueueに積むことで48kHzにダウンサンプル
+                    // Lch
                     l_pdm_queue.enqueue(l_pdm).unwrap();
-                    //Rch
+                    // Rch
                     r_pdm_queue.enqueue(r_pdm).unwrap();
                 }
             }
