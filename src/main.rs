@@ -49,7 +49,7 @@ const PIO_CLOCKDIV_INT: u16 = (RP2040_CLOCK_HZ.raw() / PIO_CLOCK_HZ.raw()) as u1
 const PIO_CLOCKDIV_FRAC: u8 = 0u8;
 
 /// バッファーサイズ（サンプル）
-const BUFFER_SIZE: usize = 8;
+const BUFFER_SIZE: usize = 16;
 const PDM_QUEUE_SIZE: usize = BUFFER_SIZE * 2;
 
 #[entry]
