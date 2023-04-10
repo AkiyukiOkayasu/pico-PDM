@@ -33,6 +33,12 @@ use bsp::hal::{
 
 mod rp2040_pll_settings_for_48khz_audio;
 
+/// サンプリング周波数 48kHz
+const SAMPLE_RATE: HertzU32 = HertzU32::from_raw(48_000u32);
+
+/// PDMデータを積分する周期 192kHz
+const PDM_INTEGRAL_RATE: HertzU32 = HertzU32::from_raw(192_000u32);
+
 /// External high-speed crystal on the pico board is 12Mhz
 const EXTERNAL_XTAL_FREQ_HZ: HertzU32 = HertzU32::from_raw(12_000_000u32);
 
@@ -295,7 +301,7 @@ fn main() -> ! {
                 let r_zeros = I1F31::from_bits(r_zeros);
                 r_pdm += r_ones - r_zeros;
 
-                if i % 4 == 0 {
+                if i % (PDM_INTEGRAL_RATE / SAMPLE_RATE) as usize == 0 {
                     // 192kHz周期で積分するので4回に1回だけQueueに積むことで48kHzにダウンサンプル
                     // Lch
                     l_pdm_queue.enqueue(l_pdm).unwrap();
