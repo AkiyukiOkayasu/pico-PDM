@@ -6,7 +6,7 @@ version = "0.1.0"
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
-embedded-hal = { version = "0.2.5", features = ["unproven"] }
+embedded-hal = { version = "0.2.7", features = ["unproven"] }
 
 defmt = "0.3.4"
 defmt-rtt = "0.4"
