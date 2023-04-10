@@ -49,8 +49,8 @@ const PIO_CLOCKDIV_INT: u16 = (RP2040_CLOCK_HZ.raw() / PIO_CLOCK_HZ.raw()) as u1
 const PIO_CLOCKDIV_FRAC: u8 = 0u8;
 
 /// バッファーサイズ（サンプル）
-const BUFFER_SIZE: usize = 16;
-const PDM_QUEUE_SIZE: usize = BUFFER_SIZE * 2;
+const BUFFER_SIZE: usize = 8;
+const PDM_QUEUE_SIZE: usize = BUFFER_SIZE * 4;
 
 #[entry]
 fn main() -> ! {
@@ -230,8 +230,8 @@ fn main() -> ! {
     let mut i2s_tx_transfer = i2s_tx_transfer.read_next(i2s_tx_buf2);
 
     // PDM用DMA設定
-    let pdm_rx_buf1 = singleton!(: [u32; 16] = [0; 16]).unwrap(); //staticなバッファーを作る
-    let pdm_rx_buf2 = singleton!(: [u32; 16] = [0; 16]).unwrap(); //staticなバッファーを作る
+    let pdm_rx_buf1 = singleton!(: [u32; BUFFER_SIZE*4] = [0; BUFFER_SIZE*4]).unwrap(); //staticなバッファーを作る
+    let pdm_rx_buf2 = singleton!(: [u32; BUFFER_SIZE*4] = [0; BUFFER_SIZE*4]).unwrap(); //staticなバッファーを作る
     let pdm_dma_config =
         double_buffer::Config::new((dma_channels.ch2, dma_channels.ch3), rx2, pdm_rx_buf1);
     let pdm_rx_transfer = pdm_dma_config.start(); //転送開始
@@ -258,7 +258,7 @@ fn main() -> ! {
         if i2s_tx_transfer.is_done() {
             let (next_tx_buf, next_tx_transfer) = i2s_tx_transfer.wait();
 
-            info!("I2S done");
+            // info!("I2S done: {}", next_tx_buf.len());
 
             // 信号処理的な
             for (i, e) in next_tx_buf.iter_mut().enumerate() {
@@ -279,7 +279,7 @@ fn main() -> ! {
         if pdm_rx_transfer.is_done() {
             let (rx_buf, next_rx_transfer) = pdm_rx_transfer.wait();
 
-            info!("PDM done");
+            // info!("PDM done: {}", rx_buf.len());
 
             for (i, e) in rx_buf.iter_mut().enumerate() {
                 let l = *e & 0b0101_0101_0101_0101_0101_0101_0101_0101; //Lchのみマスク
