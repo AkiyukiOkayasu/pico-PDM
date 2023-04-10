@@ -50,7 +50,7 @@ const PIO_CLOCKDIV_FRAC: u8 = 0u8;
 
 /// バッファーサイズ（サンプル）
 const BUFFER_SIZE: usize = 8;
-const PDM_QUEUE_SIZE: usize = BUFFER_SIZE * 4;
+const PDM_QUEUE_SIZE: usize = BUFFER_SIZE * 2;
 
 #[entry]
 fn main() -> ! {
