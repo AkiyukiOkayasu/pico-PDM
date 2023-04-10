@@ -8,7 +8,9 @@ use bsp::entry;
 use cortex_m::singleton;
 use defmt::*;
 use defmt_rtt as _;
+use embedded_hal::timer::CountDown;
 use fixed::types::I1F31;
+use fugit::ExtU32;
 use fugit::HertzU32;
 use heapless::spsc::Queue;
 use panic_probe as _;
@@ -27,6 +29,7 @@ use bsp::hal::{
     pio::{Buffers, PIOBuilder, PIOExt, PinDir, ShiftDirection},
     pll::{common_configs::PLL_USB_48MHZ, setup_pll_blocking},
     sio::Sio,
+    timer::Timer,
     watchdog::Watchdog,
     xosc::setup_xosc_blocking,
 };
@@ -158,6 +161,18 @@ fn main() -> ! {
 
     let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
     delay.delay_ms(1); //不使用でワーニングを出さないために適当に1ms delayさせているだけ。意味はない。
+
+    let mut timer = Timer::new(pac.TIMER, &mut pac.RESETS);
+    // let mut count_down = timer.count_down();
+    let mut alarm0 = timer.alarm_0().unwrap();
+    let mut alarm1 = timer.alarm_1().unwrap();
+
+    // count_down.start(500.millis());
+
+    info!("count down start");
+    info!("count down finished");
+
+    // count_down.start(500.millis());
 
     //=============================GPIO===============================
     let pins = bsp::hal::gpio::Pins::new(
