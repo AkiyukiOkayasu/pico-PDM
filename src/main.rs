@@ -258,7 +258,7 @@ fn main() -> ! {
         if i2s_tx_transfer.is_done() {
             let (next_tx_buf, next_tx_transfer) = i2s_tx_transfer.wait();
 
-            // info!("I2S DMA done");
+            info!("I2S done");
 
             // 信号処理的な
             for (i, e) in next_tx_buf.iter_mut().enumerate() {
@@ -279,7 +279,7 @@ fn main() -> ! {
         if pdm_rx_transfer.is_done() {
             let (rx_buf, next_rx_transfer) = pdm_rx_transfer.wait();
 
-            // info!("PDM DMA done");
+            info!("PDM done");
 
             for (i, e) in rx_buf.iter_mut().enumerate() {
                 let l = *e & 0b0101_0101_0101_0101_0101_0101_0101_0101; //Lchのみマスク
