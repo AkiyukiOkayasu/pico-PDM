@@ -266,6 +266,8 @@ fn main() -> ! {
     let mut l_pdm_queue: Queue<I1F31, PDM_QUEUE_SIZE> = Queue::new();
     let mut r_pdm_queue: Queue<I1F31, PDM_QUEUE_SIZE> = Queue::new();
 
+    let mut pdm_initialize_count_down = 150; // PDMの初期化用カウンター (16/48000) * 150 = 50ms程度の初期化時間
+
     //PDM Queueの初期化
     {
         for _ in 0..BUFFER_SIZE {
@@ -299,6 +301,18 @@ fn main() -> ! {
 
         if pdm_rx_transfer.is_done() {
             let (rx_buf, next_rx_transfer) = pdm_rx_transfer.wait();
+
+            // PDMマイクが初期化中のゴミデータが積分に影響しないようにする
+            // 初期化中は極小さな値を積分するので、DCオフセット的な成分が出力されるが、24bitのDACの場合は問題ない
+            if pdm_initialize_count_down > 0 {
+                info!("...");
+                pdm_initialize_count_down -= 1;
+                l_pdm = I1F31::ZERO;
+                r_pdm = I1F31::ZERO;
+                if pdm_initialize_count_down == 0 {
+                    info!("PDM initialized");
+                }
+            }
 
             // info!("PDM done: {}", rx_buf.len());
 
