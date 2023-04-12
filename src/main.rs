@@ -300,27 +300,25 @@ fn main() -> ! {
             }
 
             for (i, e) in rx_buf.iter_mut().enumerate() {
-                let l = *e & 0b01010101_01010101_01010101_01010101; //Lchのみマスク
+                let l = *e & 0b0101_0101_0101_0101_0101_0101_0101_0101; //Lchのみマスク
                 let l_ones = l.count_ones(); // PDMがpositiveのときの回数
                 let l_zeros = 16u32 - l_ones; // PDMがnegativeのときの回数
                 let l_diff: i32 = l_ones as i32 - l_zeros as i32;
                 let l_diff = I1F31::from_bits(l_diff);
 
-                if pdm_initialize_count_down == 0 {
-                    if i == 1 {
-                        if l_ones > l_zeros {
-                            info!("+");
-                        } else if l_ones < l_zeros {
-                            info!("-!!!!");
-                        } else {
-                            info!("0");
-                        }
+                if pdm_initialize_count_down == 0 && i == 1 {
+                    if l_ones > l_zeros {
+                        info!("+");
+                    } else if l_ones < l_zeros {
+                        info!("-!!!!");
+                    } else {
+                        info!("0");
                     }
                 }
 
                 l_pdm += l_diff;
 
-                let r = *e & 0b10101010_10101010_10101010_10101010; //Rchのみマスク
+                let r = *e & 0b1010_1010_1010_1010_1010_1010_1010_1010; //Rchのみマスク
                 let r_ones = r.count_ones(); // PDMがpositiveのときの回数
                 let r_zeros = 16u32 - r_ones; // PDMがnegativeのときの回数
                 let r_diff: i32 = r_ones as i32 - r_zeros as i32;
