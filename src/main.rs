@@ -5,6 +5,7 @@
 #![no_main]
 
 use bsp::entry;
+use cic_fixed;
 use cortex_m::singleton;
 use defmt::*;
 use defmt_rtt as _;

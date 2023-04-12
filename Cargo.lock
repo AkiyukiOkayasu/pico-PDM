@@ -109,12 +109,8 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "cic-fixed"
-version = "0.1.0"
-source = "git+https://github.com/AkiyukiOkayasu/cic-fixed#6bc188ad4d77266ef49855abe77d4e7ba6521368"
-dependencies = [
- "fixed",
- "heapless",
-]
+version = "0.1.1"
+source = "git+https://github.com/AkiyukiOkayasu/cic-fixed#2613cad797343e0939db7bc853409ecbe68acc59"
 
 [[package]]
 name = "codespan-reporting"
