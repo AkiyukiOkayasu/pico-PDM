@@ -272,12 +272,12 @@ fn main() -> ! {
             for (i, e) in next_tx_buf.iter_mut().enumerate() {
                 if i % 2 == 0 {
                     //Lch
-                    l_pdm = l_pdm_queue.dequeue().unwrap();
-                    *e = l_pdm.to_bits() as u32;
+                    let l = l_pdm_queue.dequeue().unwrap();
+                    *e = l.to_bits() as u32;
                 } else {
                     //Rch
-                    r_pdm = r_pdm_queue.dequeue().unwrap();
-                    *e = r_pdm.to_bits() as u32;
+                    let r = r_pdm_queue.dequeue().unwrap();
+                    *e = r.to_bits() as u32;
                 }
             }
 
