@@ -290,7 +290,6 @@ fn main() -> ! {
             // PDMマイクが初期化中のゴミデータが積分に影響しないようにする
             // 初期化中は極小さな値を積分するので、DCオフセット的な成分が出力されるが、24bitのDACの場合は問題ない
             if pdm_initialize_count_down > 0 {
-                info!("...");
                 pdm_initialize_count_down -= 1;
                 l_pdm = I1F31::ZERO;
                 r_pdm = I1F31::ZERO;
@@ -298,8 +297,6 @@ fn main() -> ! {
                     info!("PDM initialized");
                 }
             }
-
-            // info!("PDM done: {}", rx_buf.len());
 
             for (i, e) in rx_buf.iter_mut().enumerate() {
                 let l = *e & 0b0101_0101_0101_0101_0101_0101_0101_0101; //Lchのみマスク
