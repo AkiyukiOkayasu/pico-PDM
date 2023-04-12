@@ -108,6 +108,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "cic-fixed"
+version = "0.1.0"
+source = "git+https://github.com/AkiyukiOkayasu/cic-fixed#6bc188ad4d77266ef49855abe77d4e7ba6521368"
+dependencies = [
+ "fixed",
+ "heapless",
+]
+
+[[package]]
 name = "codespan-reporting"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -811,6 +820,7 @@ dependencies = [
 name = "rp2040-project-template"
 version = "0.1.0"
 dependencies = [
+ "cic-fixed",
  "cortex-m",
  "cortex-m-rt",
  "defmt",
