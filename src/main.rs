@@ -157,7 +157,7 @@ fn main() -> ! {
     }
 
     let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
-    delay.delay_ms(1); //不使用でワーニングを出さないために適当に1ms delayさせているだけ。意味はない。
+    delay.delay_ms(100); // PDMマイクのパワーアップシーケンスに50ms程度必要
 
     //=============================GPIO===============================
     let pins = bsp::hal::gpio::Pins::new(
