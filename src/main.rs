@@ -253,7 +253,7 @@ fn main() -> ! {
 
     let mut pdm_initialize_count_down = 150; // PDMの初期化用カウンター (16/48000) * 150 = 50ms程度の初期化時間
 
-    //PDM Queueの初期化
+    //PDM QueueをBUFFER_SIZE分だけ0埋めして初期化
     {
         for _ in 0..BUFFER_SIZE {
             l_pdm_queue.enqueue(I1F31::ZERO).unwrap();
