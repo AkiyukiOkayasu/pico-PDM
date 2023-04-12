@@ -314,10 +314,8 @@ fn main() -> ! {
 
                 if i % (PDM_INTEGRAL_RATE / SAMPLE_RATE) as usize == 0 {
                     // 192kHz周期で積分するので4回に1回だけQueueに積むことで48kHzにダウンサンプル
-                    // Lch
-                    l_pdm_queue.enqueue(l_pdm).unwrap();
-                    // Rch
-                    r_pdm_queue.enqueue(r_pdm).unwrap();
+                    l_pdm_queue.enqueue(l_pdm).unwrap(); // Lch
+                    r_pdm_queue.enqueue(r_pdm).unwrap(); // Rch
                 }
             }
 
