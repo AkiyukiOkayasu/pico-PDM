@@ -299,18 +299,18 @@ fn main() -> ! {
             }
 
             for (i, e) in rx_buf.iter_mut().enumerate() {
-                let l = *e & 0b0101_0101_0101_0101_0101_0101_0101_0101; //Lchのみマスク
                 let l_ones = l.count_ones() as i32; // PDMがpositiveのときの回数
                 let l_zeros = 16i32 - l_ones; // PDMがnegativeのときの回数
                 let l_ones = I1F31::from_bits(l_ones);
                 let l_zeros = I1F31::from_bits(l_zeros);
                 l_pdm += l_ones - l_zeros;
-                let r = *e & 0b1010_1010_1010_1010_1010_1010_1010_1010; //Rchのみマスク
                 let r_ones = r.count_ones() as i32; // PDMがpositiveのときの回数
                 let r_zeros = 16i32 - r_ones; // PDMがnegativeのときの回数
                 let r_ones = I1F31::from_bits(r_ones);
                 let r_zeros = I1F31::from_bits(r_zeros);
                 r_pdm += r_ones - r_zeros;
+                let l = *e & 0b01010101_01010101_01010101_01010101; //Lchのみマスク
+                let r = *e & 0b10101010_10101010_10101010_10101010; //Rchのみマスク
 
                 if i % (PDM_INTEGRAL_RATE / SAMPLE_RATE) as usize == 0 {
                     // 192kHz周期で積分するので4回に1回だけQueueに積むことで48kHzにダウンサンプル
