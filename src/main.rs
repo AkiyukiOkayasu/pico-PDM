@@ -167,7 +167,6 @@ fn main() -> ! {
         &mut pac.RESETS,
     );
 
-    //=============================PIO===============================
     // configure GPIO for PIO0.
     let mclk_pin = pins.gpio8.into_mode::<FunctionPio0>();
     let i2s_send_data_pin = pins.gpio9.into_mode::<FunctionPio0>();
@@ -176,6 +175,7 @@ fn main() -> ! {
     let pdm_input_pin = pins.gpio12.into_mode::<FunctionPio0>();
     let pdm_clock_output_pin = pins.gpio13.into_mode::<FunctionPio0>();
 
+    //=============================PIO===============================
     let pio_i2s_mclk_output = pio_file!("./src/i2s.pio", select_program("mclk_output")).program;
     let pio_i2s_send_master = pio_file!("./src/i2s.pio", select_program("i2s_send_master")).program;
     let pio_pdm = pio_file!("./src/pdm.pio", select_program("pdm_stereo")).program;
