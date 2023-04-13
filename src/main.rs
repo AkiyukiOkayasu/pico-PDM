@@ -247,13 +247,8 @@ fn main() -> ! {
     let sm_group_i2s_pdm = sm1.with(sm2); //I2SとPDMのPIOを同時にスタートさせるためにグループ化する
     sm_group_i2s_pdm.start(); // Start I2S and PDM PIO
 
-    let mut l_pdm = I1F31::ZERO; //PDMの左チャンネルの積分値
-    let mut r_pdm = I1F31::ZERO; //PDMの右チャンネルの積分値
     let mut l_pdm_queue: Queue<I1F31, PDM_QUEUE_SIZE> = Queue::new();
     let mut r_pdm_queue: Queue<I1F31, PDM_QUEUE_SIZE> = Queue::new();
-
-    let mut pdm_initialize_count_down = 150; // PDMの初期化用カウンター (16/48000) * 150 = 50ms程度の初期化時間
-
     let mut l_cic = CicDecimationFilter::<64, 3>::new(); //CICフィルターの初期化
     let mut r_cic = CicDecimationFilter::<64, 3>::new(); //CICフィルターの初期化
 
@@ -291,24 +286,13 @@ fn main() -> ! {
         if pdm_rx_transfer.is_done() {
             let (rx_buf, next_rx_transfer) = pdm_rx_transfer.wait();
 
-            // PDMマイクが初期化中のゴミデータが積分に影響しないようにする
-            // 初期化中は極小さな値を積分するので、DCオフセット的な成分が出力されるが、24bitのDACの場合は問題ない
-            if pdm_initialize_count_down > 0 {
-                pdm_initialize_count_down -= 1;
-                l_pdm = I1F31::ZERO;
-                r_pdm = I1F31::ZERO;
-                if pdm_initialize_count_down == 0 {
-                    info!("PDM initialized");
-                }
-            }
-
-            for (i, e) in rx_buf.iter_mut().enumerate() {
+            for e in rx_buf.iter_mut() {
                 //上位ビットから順に処理する
-                for k in (0..32).rev() {
+                for i in (0..32).rev() {
                     // このループは手動で展開してもいいかもしれない
-                    let cic_input_value: i32 = if bit_bang(*e, k) { 1i32 } else { -1i32 };
+                    let cic_input_value: i32 = if bit_bang(*e, i) { 1i32 } else { -1i32 };
 
-                    if i % 2 == 0 {
+                    if i % 2 == 1 {
                         //Lch
                         if let Some(v) = l_cic.filter(cic_input_value) {
                             l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
