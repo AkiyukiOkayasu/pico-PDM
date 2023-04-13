@@ -5,7 +5,7 @@
 #![no_main]
 
 use bsp::entry;
-use cic_fixed::CicFilter;
+use cic_fixed::CicDecimationFilter;
 use cortex_m::singleton;
 use defmt::*;
 use defmt_rtt as _;
@@ -254,7 +254,7 @@ fn main() -> ! {
 
     let mut pdm_initialize_count_down = 150; // PDMの初期化用カウンター (16/48000) * 150 = 50ms程度の初期化時間
 
-    let mut cic_filter = CicFilter::<16, 5>::new(); //CICフィルターの初期化
+    let mut cic = CicDecimationFilter::<64, 3>::new(); //CICフィルターの初期化
 
     //PDM QueueをBUFFER_SIZE分だけ0埋めして初期化
     {
