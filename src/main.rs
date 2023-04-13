@@ -288,21 +288,148 @@ fn main() -> ! {
 
             for e in rx_buf.iter_mut() {
                 //上位ビットから順に処理する
-                for i in (0..32).rev() {
-                    // このループは手動で展開してもいいかもしれない
-                    let cic_input_value: i32 = if bit_bang(*e, i) { 1i32 } else { -1i32 };
+                let cic_input_value: i32 = if bit_bang(*e, 31) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 30) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
 
-                    if i % 2 == 1 {
-                        //Lch
-                        if let Some(v) = l_cic.filter(cic_input_value) {
-                            l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
-                        }
-                    } else {
-                        //Rch
-                        if let Some(v) = r_cic.filter(cic_input_value) {
-                            r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
-                        }
-                    }
+                let cic_input_value: i32 = if bit_bang(*e, 29) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 28) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+
+                let cic_input_value: i32 = if bit_bang(*e, 27) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 26) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+
+                let cic_input_value: i32 = if bit_bang(*e, 25) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 24) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+
+                let cic_input_value: i32 = if bit_bang(*e, 23) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 22) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+
+                let cic_input_value: i32 = if bit_bang(*e, 21) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 20) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+
+                let cic_input_value: i32 = if bit_bang(*e, 19) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 18) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+
+                let cic_input_value: i32 = if bit_bang(*e, 17) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 16) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+
+                let cic_input_value: i32 = if bit_bang(*e, 15) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 14) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+
+                let cic_input_value: i32 = if bit_bang(*e, 13) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 12) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+
+                let cic_input_value: i32 = if bit_bang(*e, 11) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 10) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+
+                let cic_input_value: i32 = if bit_bang(*e, 9) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 8) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+
+                let cic_input_value: i32 = if bit_bang(*e, 7) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 6) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+
+                let cic_input_value: i32 = if bit_bang(*e, 5) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 4) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+
+                let cic_input_value: i32 = if bit_bang(*e, 3) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 2) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+
+                let cic_input_value: i32 = if bit_bang(*e, 1) { 1i32 } else { -1i32 };
+                if let Some(v) = l_cic.filter(cic_input_value) {
+                    l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                }
+                let cic_input_value: i32 = if bit_bang(*e, 0) { 1i32 } else { -1i32 };
+                if let Some(v) = r_cic.filter(cic_input_value) {
+                    r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
                 }
             }
 
