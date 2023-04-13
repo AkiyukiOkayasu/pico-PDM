@@ -34,9 +34,6 @@ use bsp::hal::{
 
 mod rp2040_pll_settings_for_48khz_audio;
 
-/// サンプリング周波数 48kHz
-const SAMPLE_RATE: HertzU32 = HertzU32::from_raw(48_000u32);
-
 /// External high-speed crystal on the pico board is 12Mhz
 const EXTERNAL_XTAL_FREQ_HZ: HertzU32 = HertzU32::from_raw(12_000_000u32);
 
