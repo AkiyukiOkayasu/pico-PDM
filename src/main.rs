@@ -307,17 +307,6 @@ fn main() -> ! {
                 let l_zeros = 16u32 - l_ones; // PDMがnegativeのときの回数
                 let l_diff: i32 = l_ones as i32 - l_zeros as i32;
                 let l_diff = I1F31::from_bits(l_diff);
-
-                if pdm_initialize_count_down == 0 && i == 1 {
-                    if l_ones > l_zeros {
-                        info!("+");
-                    } else if l_ones < l_zeros {
-                        info!("-!!!!");
-                    } else {
-                        info!("0");
-                    }
-                }
-
                 l_pdm += l_diff;
 
                 let r = *e & 0b1010_1010_1010_1010_1010_1010_1010_1010; //Rchのみマスク
