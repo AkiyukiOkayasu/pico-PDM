@@ -246,8 +246,8 @@ fn main() -> ! {
 
     let mut l_pdm_queue: Queue<I1F31, PDM_QUEUE_SIZE> = Queue::new();
     let mut r_pdm_queue: Queue<I1F31, PDM_QUEUE_SIZE> = Queue::new();
-    let mut l_cic = CicDecimationFilter::<64, 2>::new(); //CICフィルターの初期化
-    let mut r_cic = CicDecimationFilter::<64, 2>::new(); //CICフィルターの初期化
+    let mut l_cic = CicDecimationFilter::<64, 3>::new(); //CICフィルターの初期化
+    let mut r_cic = CicDecimationFilter::<64, 3>::new(); //CICフィルターの初期化
 
     //PDM QueueをBUFFER_SIZE分だけ0埋めして初期化
     {
