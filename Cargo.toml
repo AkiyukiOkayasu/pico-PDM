@@ -1,7 +1,13 @@
 [package]
 edition = "2021"
-name = "rp2040-project-template"
-version = "0.1.0"
+name = "pico-pdm"
+version = "1.0.0"
+authors = ["Akiyuki Okayasu <akiyuki.okayasu@gmail.com>"]
+description = "CIC filter"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/AkiyukiOkayasu/pico-PDM"
+readme = "README.md"
+rust-version = "1.68.2"
 
 [dependencies]
 cortex-m = "0.7"

@@ -615,6 +615,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "db8bcd96cb740d03149cbad5518db9fd87126a10ab519c011893b1754134c468"
 
 [[package]]
+name = "pico-pdm"
+version = "1.0.0"
+dependencies = [
+ "cic-fixed",
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt",
+ "defmt-rtt",
+ "embedded-hal",
+ "fixed",
+ "fugit",
+ "heapless",
+ "panic-probe",
+ "pio",
+ "pio-proc",
+ "rp-pico",
+]
+
+[[package]]
 name = "pio"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -810,25 +829,6 @@ dependencies = [
  "cortex-m",
  "cortex-m-rt",
  "vcell",
-]
-
-[[package]]
-name = "rp2040-project-template"
-version = "0.1.0"
-dependencies = [
- "cic-fixed",
- "cortex-m",
- "cortex-m-rt",
- "defmt",
- "defmt-rtt",
- "embedded-hal",
- "fixed",
- "fugit",
- "heapless",
- "panic-probe",
- "pio",
- "pio-proc",
- "rp-pico",
 ]
 
 [[package]]
