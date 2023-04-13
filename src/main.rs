@@ -286,7 +286,7 @@ fn main() -> ! {
         if pdm_rx_transfer.is_done() {
             let (rx_buf, next_rx_transfer) = pdm_rx_transfer.wait();
 
-            for e in rx_buf.iter_mut() {
+            for e in rx_buf.iter() {
                 //上位ビットから順に処理する
                 let cic_input_value: i32 = if bit_bang(*e, 31) { 1i32 } else { -1i32 };
                 if let Some(v) = l_cic.filter(cic_input_value) {
