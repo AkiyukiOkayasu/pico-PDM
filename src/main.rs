@@ -254,7 +254,8 @@ fn main() -> ! {
 
     let mut pdm_initialize_count_down = 150; // PDMの初期化用カウンター (16/48000) * 150 = 50ms程度の初期化時間
 
-    let mut cic = CicDecimationFilter::<64, 3>::new(); //CICフィルターの初期化
+    let mut l_cic = CicDecimationFilter::<64, 3>::new(); //CICフィルターの初期化
+    let mut r_cic = CicDecimationFilter::<64, 3>::new(); //CICフィルターの初期化
 
     //PDM QueueをBUFFER_SIZE分だけ0埋めして初期化
     {
@@ -302,24 +303,22 @@ fn main() -> ! {
             }
 
             for (i, e) in rx_buf.iter_mut().enumerate() {
-                let l = *e & 0b0101_0101_0101_0101_0101_0101_0101_0101; //Lchのみマスク
-                let l_ones = l.count_ones(); // PDMがpositiveのときの回数
-                let l_zeros = 16u32 - l_ones; // PDMがnegativeのときの回数
-                let l_diff: i32 = l_ones as i32 - l_zeros as i32;
-                let l_diff = I1F31::from_bits(l_diff);
-                l_pdm += l_diff;
+                //上位ビットから順に処理する
+                for k in (0..32).rev() {
+                    // このループは手動で展開してもいいかもしれない
+                    let cic_input_value: i32 = if bit_bang(*e, k) { 1i32 } else { -1i32 };
 
-                let r = *e & 0b1010_1010_1010_1010_1010_1010_1010_1010; //Rchのみマスク
-                let r_ones = r.count_ones(); // PDMがpositiveのときの回数
-                let r_zeros = 16u32 - r_ones; // PDMがnegativeのときの回数
-                let r_diff: i32 = r_ones as i32 - r_zeros as i32;
-                let r_diff = I1F31::from_bits(r_diff);
-                r_pdm += r_diff;
-
-                if i % (PDM_INTEGRAL_RATE / SAMPLE_RATE) as usize == 0 {
-                    // 192kHz周期で積分するので4回に1回だけQueueに積むことで48kHzにダウンサンプル
-                    l_pdm_queue.enqueue(l_pdm).unwrap(); // Lch
-                    r_pdm_queue.enqueue(r_pdm).unwrap(); // Rch
+                    if i % 2 == 0 {
+                        //Lch
+                        if let Some(v) = l_cic.filter(cic_input_value) {
+                            l_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                        }
+                    } else {
+                        //Rch
+                        if let Some(v) = r_cic.filter(cic_input_value) {
+                            r_pdm_queue.enqueue(I1F31::from_bits(v)).unwrap();
+                        }
+                    }
                 }
             }
 
