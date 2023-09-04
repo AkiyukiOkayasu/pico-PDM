@@ -56,6 +56,7 @@ const PDM_QUEUE_SIZE: usize = BUFFER_SIZE * 2;
 #[entry]
 fn main() -> ! {
     info!("Program start");
+    info!("BUFFER_SIZE: {=usize}", BUFFER_SIZE);
     let mut pac = pac::Peripherals::take().unwrap();
     let core = pac::CorePeripherals::take().unwrap();
     let mut watchdog = Watchdog::new(pac.WATCHDOG);
