@@ -437,6 +437,6 @@ fn main() -> ! {
 /// * `v` - 32bitの値
 /// * `index` - 0~31のビット位置（LSBが0）
 #[inline]
-fn bit_bang(v: u32, index: u8) -> bool {
+const fn bit_bang(v: u32, index: u8) -> bool {
     v & (1 << index) > 0
 }
