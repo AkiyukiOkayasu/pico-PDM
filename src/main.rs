@@ -181,11 +181,13 @@ fn main() -> ! {
     let pio_i2s_send_master = pio.install(&pio_i2s_send_master).unwrap();
     let pio_pdm = pio.install(&pio_pdm).unwrap();
 
+    // MCLK送信用PIOの設定
     let (mut sm0, _rx0, _tx0) = PIOBuilder::from_program(pio_i2s_mclk_output)
         .set_pins(mclk_pin.id().num, 1)
         .clock_divisor_fixed_point(PIO_CLOCKDIV_INT, PIO_CLOCKDIV_FRAC)
         .build(sm0);
 
+    // I2S送信用PIOの設定
     let (mut sm1, _rx1, tx1) = PIOBuilder::from_program(pio_i2s_send_master)
         .out_pins(i2s_send_data_pin.id().num, 1)
         .side_set_pin_base(i2s_send_sclk_pin.id().num)
@@ -196,6 +198,7 @@ fn main() -> ! {
         .buffers(Buffers::OnlyTx) // Rx FIFOは使わないので、その分をTx FIFOにjoin
         .build(sm1);
 
+    // PDM用PIOの設定
     let (mut sm2, rx2, _tx1) = PIOBuilder::from_program(pio_pdm)
         .in_pin_base(pdm_input_pin.id().num)
         .side_set_pin_base(pdm_clock_output_pin.id().num)
@@ -264,12 +267,14 @@ fn main() -> ! {
             // 信号処理的な
             for (i, e) in next_tx_buf.iter_mut().enumerate() {
                 if i % 2 == 0 {
-                    //Lch
+                    // Lch
                     let l = l_pdm_queue.dequeue().unwrap();
+                    // 信号処理をするならここでやる
                     *e = l.to_bits() as u32;
                 } else {
-                    //Rch
+                    // Rch
                     let r = r_pdm_queue.dequeue().unwrap();
+                    // 信号処理をするならここでやる
                     *e = r.to_bits() as u32;
                 }
             }
