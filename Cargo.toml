@@ -14,18 +14,18 @@ cortex-m = "0.7"
 cortex-m-rt = "0.7"
 embedded-hal = { version = "0.2.7", features = ["unproven"] }
 
-defmt = "0.3.4"
+defmt = "0.3.5"
 defmt-rtt = "0.4"
 panic-probe = { version = "0.3", features = ["print-defmt"] }
 
 # We're using a Pico by default on this template
-rp-pico = "0.7"
-fugit = "0.3.6"
+rp-pico = "0.8.0"
+fugit = "0.3.7"
 fixed = "1.23.1"
 pio = "0.2.1"
-pio-proc = "0.2.1"
+pio-proc = "0.2.2"
 heapless = "0.7.16"
-cic-fixed = { git = "https://github.com/AkiyukiOkayasu/cic-fixed", version = "0.3.1" }
+cic-fixed = { git = "https://github.com/AkiyukiOkayasu/cic-fixed", branch = "main" }
 
 # but you can use any BSP. Uncomment this to use the pro_micro_rp2040 BSP instead
 # sparkfun-pro-micro-rp2040 = "0.3"
