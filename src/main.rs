@@ -163,12 +163,12 @@ fn main() -> ! {
     );
 
     // configure GPIO for PIO0.
-    let mclk_pin = pins.gpio8.into_mode::<FunctionPio0>();
-    let i2s_send_data_pin = pins.gpio9.into_mode::<FunctionPio0>();
-    let i2s_send_sclk_pin = pins.gpio10.into_mode::<FunctionPio0>();
-    let i2s_send_lrclk_pin = pins.gpio11.into_mode::<FunctionPio0>();
-    let pdm_input_pin = pins.gpio12.into_mode::<FunctionPio0>();
-    let pdm_clock_output_pin = pins.gpio13.into_mode::<FunctionPio0>();
+    let mclk_pin = pins.gpio8.into_function::<FunctionPio0>();
+    let i2s_send_data_pin = pins.gpio9.into_function::<FunctionPio0>();
+    let i2s_send_sclk_pin = pins.gpio10.into_function::<FunctionPio0>();
+    let i2s_send_lrclk_pin = pins.gpio11.into_function::<FunctionPio0>();
+    let pdm_input_pin = pins.gpio12.into_function::<FunctionPio0>();
+    let pdm_clock_output_pin = pins.gpio13.into_function::<FunctionPio0>();
 
     //=============================PIO===============================
     let pio_i2s_mclk_output = pio_file!("./src/i2s.pio", select_program("mclk_output")).program;
