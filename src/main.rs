@@ -38,7 +38,7 @@ mod rp2040_pll_settings_for_48khz_audio;
 const EXTERNAL_XTAL_FREQ_HZ: HertzU32 = HertzU32::from_raw(12_000_000u32);
 
 /// RP2040の動作周波数
-const RP2040_CLOCK_HZ: HertzU32 = HertzU32::from_raw(153_600_000u32);
+const RP2040_CLOCK_HZ: HertzU32 = HertzU32::from_raw(230_400_000u32);
 
 /// PIOの動作周波数 15.36MHz(48kHz*64*5) I2SのMCLKをPIOで作るので48kHzの整数倍にする
 const PIO_CLOCK_HZ: HertzU32 = HertzU32::from_raw(15_360_000u32);
@@ -82,7 +82,7 @@ fn main() -> ! {
         let pll_sys = setup_pll_blocking(
             pac.PLL_SYS,
             xosc.operating_frequency(),
-            rp2040_pll_settings_for_48khz_audio::SYS_PLL_CONFIG_153P6MHZ,
+            rp2040_pll_settings_for_48khz_audio::SYS_PLL_CONFIG_230P4MHZ,
             &mut clocks,
             &mut pac.RESETS,
         )
