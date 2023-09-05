@@ -17,3 +17,23 @@
     nop        side 0b1; in命令の前に1clock分マージンを入れる
     in pins, 1 side 0b1; Rch
 .wrap
+
+; PDM stereo 1.536MHz
+; Master
+; fs: 48kHz
+; sysClk: 153.6MHz
+; PIO Clock freq: 15.36MHz (320fs)
+; PDM clock: 1.536MHz(48kHz * 32)
+; 1周期を10 instructionにする
+; side-set: 1 (PDM clock)
+; Akiyuki Okayasu
+
+.program pdm_stereo_1M536
+.side_set 1
+
+.wrap_target    
+    nop [3]    side 0b0; in命令の前に4clock分マージンを入れる
+    in pins, 1 side 0b0; Lch    
+    nop [3]        side 0b1; in命令の前に4clock分マージンを入れる
+    in pins, 1 side 0b1; Rch
+.wrap
