@@ -118,8 +118,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "cic-fixed"
-version = "0.4.0"
-source = "git+https://github.com/AkiyukiOkayasu/cic-fixed?branch=main#95322d4953436b9c80aa50576fc8bb4f7f6fc608"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed3115de2e40ce788ea94c0f2b0ab71881a21b155a8dd4d97802804d79129ab6"
 
 [[package]]
 name = "codespan-reporting"
