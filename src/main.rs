@@ -276,12 +276,14 @@ fn main() -> ! {
                     // Lch
                     let l = l_pdm_queue.dequeue().unwrap();
                     // 信号処理をするならここでやる
-                    *e = (l.to_bits() as u32) << (32 - output_bits); //CICフィルターの出力（19bit）を32bit固定小数点に正規化
+                    let sample = l.to_bits() * (2 ^ 13); //CICフィルターの出力（19bit）を32bit固定小数点に正規化
+                    *e = sample as u32;
                 } else {
                     // Rch
                     let r = r_pdm_queue.dequeue().unwrap();
                     // 信号処理をするならここでやる
-                    *e = (r.to_bits() as u32) << (32 - output_bits); //CICフィルターの出力（19bit）を32bit固定小数点に正規化
+                    let sample = r.to_bits() * (2 ^ 13); //CICフィルターの出力（19bit）を32bit固定小数点に正規化
+                    *e = sample as u32;
                 }
             }
 
