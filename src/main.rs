@@ -249,6 +249,11 @@ fn main() -> ! {
     let mut r_pdm_queue: Queue<I1F31, PDM_QUEUE_SIZE> = Queue::new();
     let mut l_cic = CicDecimationFilter::<64, 3>::new(); //CICフィルターの初期化
     let mut r_cic = CicDecimationFilter::<64, 3>::new(); //CICフィルターの初期化
+    const INPUT_BITS: u32 = 1; //PDMなので1bit
+    let bit_growth = l_cic.bit_growth(); //CICフィルターによって増加するBit数
+    let output_bits = INPUT_BITS + bit_growth; //CICフィルターから出力されるBit数
+    info!("Bit growth of CIC: {}bits", bit_growth);
+    info!("Output bits of CIC: {}bits", output_bits);
 
     //PDM QueueをBUFFER_SIZE分だけ0埋めして初期化
     {
