@@ -1,6 +1,4 @@
-//! Blinks the LED on a Pico board
-//!
-//! This will blink an LED attached to GP25, which is the pin the Pico uses for the on-board LED.
+//! PDM→PCM変換のPIOを使ったサンプル
 #![no_std]
 #![no_main]
 
