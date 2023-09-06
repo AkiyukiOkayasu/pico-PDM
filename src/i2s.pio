@@ -1,9 +1,11 @@
 ; MCLK output
-; fs: 48kHz
-; Output MCLK freq: 64fs
-; sysClk: 153.6MHz
-; PIO Clock freq: 15.36MHz (320fs)
 ; Akiyuki Okayasu
+; fs: 48kHz or 96kHz
+; Output MCLK freq: 64fs
+; PIO Clock freq: 15.36MHz (320fs@48kHz), 30.72MHz (320fs@96kHz)
+; Jitter軽減のため、PIO分周比率は整数にするのが望ましい。
+; fs=48kHzのときは、sysClk: 153.6MHz or 230.4MHzにすると整数にできる。
+; fs=96kHzのときは、sysClk: 153.6MHz or 307.2MHzにすると整数にできる。
 
 .program mclk_output
 
@@ -12,13 +14,14 @@
     set pins, 0b0 [1]
 .wrap
 
-; I2S send
-; Master
-; fs: 48kHz
-; sysClk: 153.6MHz
-; PIO Clock freq: 15.36MHz (320fs)
-; Bit depth: 32bit
+; I2S send Master
 ; Akiyuki Okayasu
+; fs: 48kHz or 96kHz
+; PIO Clock freq: 15.36MHz (320fs@48kHz), 30.72MHz (320fs@96kHz)
+; Bit depth: 32bit
+; Jitter軽減のため、PIO分周比率は整数にするのが望ましい。
+; fs=48kHzのときは、sysClk: 153.6MHz or 230.4MHzにすると整数にできる。
+; fs=96kHzのときは、sysClk: 153.6MHz or 307.2MHzにすると整数にできる。
 
 .program i2s_send_master
 .side_set 2
