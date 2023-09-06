@@ -40,7 +40,7 @@ const EXTERNAL_XTAL_FREQ_HZ: HertzU32 = HertzU32::from_raw(12_000_000u32);
 const RP2040_CLOCK_HZ: HertzU32 = HertzU32::from_raw(230_400_000u32);
 
 /// PCMのサンプリング周波数
-const SAMPLE_RATE: HertzU32 = HertzU32::from_raw(48000u32);
+const SAMPLE_RATE: HertzU32 = HertzU32::from_raw(96_000u32);
 
 /// I2S用PIOの動作周波数 (fs*64*5) I2SのMCLKをPIOで作るのでfsの整数倍にする
 const I2S_PIO_CLOCK_HZ: HertzU32 = HertzU32::from_raw(SAMPLE_RATE.raw() * 64u32 * 5u32);
@@ -52,7 +52,7 @@ const I2S_PIO_CLOCKDIV_INT: u16 = (RP2040_CLOCK_HZ.raw() / I2S_PIO_CLOCK_HZ.raw(
 const I2S_PIO_CLOCKDIV_FRAC: u8 = 0u8;
 
 /// PDM clockの周波数
-const PDM_CLOCK_HZ: HertzU32 = HertzU32::from_raw(3072000);
+const PDM_CLOCK_HZ: HertzU32 = HertzU32::from_raw(3_072_000);
 
 /// PDM用PIOの分周比率の整数部分 RP2040動作周波数/PIO動作周波数
 /// int + (frac/256)で分周する
