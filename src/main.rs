@@ -39,22 +39,32 @@ const EXTERNAL_XTAL_FREQ_HZ: HertzU32 = HertzU32::from_raw(12_000_000u32);
 /// RP2040の動作周波数
 const RP2040_CLOCK_HZ: HertzU32 = HertzU32::from_raw(230_400_000u32);
 
-/// PIOの動作周波数 15.36MHz(48kHz*64*5) I2SのMCLKをPIOで作るので48kHzの整数倍にする
-const PIO_CLOCK_HZ: HertzU32 = HertzU32::from_raw(15_360_000u32);
+/// PCMのサンプリング周波数
+const SAMPLE_RATE: HertzU32 = HertzU32::from_raw(48000u32);
 
-/// PIOの分周比率の整数部分 RP2040動作周波数/PIO動作周波数
+/// I2S用PIOの動作周波数 (fs*64*5) I2SのMCLKをPIOで作るのでfsの整数倍にする
+const I2S_PIO_CLOCK_HZ: HertzU32 = HertzU32::from_raw(SAMPLE_RATE.raw() * 64u32 * 5u32);
+
+/// I2S用PIOの分周比率の整数部分 RP2040動作周波数/PIO動作周波数
 /// int + (frac/256)で分周する
-const PIO_CLOCKDIV_INT: u16 = (RP2040_CLOCK_HZ.raw() / PIO_CLOCK_HZ.raw()) as u16;
-/// PIOの分周比率の少数部分 Jitterを最小にするには0にするべき
-const PIO_CLOCKDIV_FRAC: u8 = 0u8;
+const I2S_PIO_CLOCKDIV_INT: u16 = (RP2040_CLOCK_HZ.raw() / I2S_PIO_CLOCK_HZ.raw()) as u16;
+/// I2S用PIOの分周比率の少数部分 Jitterを最小にするには0にするべき
+const I2S_PIO_CLOCKDIV_FRAC: u8 = 0u8;
+
+/// PDM clockの周波数
+const PDM_CLOCK_HZ: HertzU32 = HertzU32::from_raw(3072000);
+
+/// PDM用PIOの分周比率の整数部分 RP2040動作周波数/PIO動作周波数
+/// int + (frac/256)で分周する
+const PDM_PIO_CLOCKDIV_INT: u16 = (RP2040_CLOCK_HZ.raw() / PDM_CLOCK_HZ.raw()) as u16;
+/// PDM用PIOの分周比率の少数部分 Jitterを最小にするには0にするべき
+const PDM_PIO_CLOCKDIV_FRAC: u8 = 0u8;
 
 /// バッファーサイズ（サンプル）
 const BUFFER_SIZE: usize = 16;
 const PDM_QUEUE_SIZE: usize = BUFFER_SIZE * 2;
-const SAMPLE_RATE: usize = 48000; // PCMのサンプリング周波数
-const PDM_CLOCK_RATE: usize = 3072000; //PDM clockの周波数
 
-const CIC_DECIMATION_FACTOR: usize = PDM_CLOCK_RATE / SAMPLE_RATE; //CICフィルターのデシメーションファクター
+const CIC_DECIMATION_FACTOR: usize = (PDM_CLOCK_HZ.raw() / SAMPLE_RATE.raw()) as usize; //CICフィルターのデシメーションファクター
 
 //CICフィルターの出力（19bit）を32bit固定小数点に正規化するためのゲイン
 // const GAIN: i32 = 2i32.pow(13);
@@ -64,8 +74,8 @@ const GAIN: i32 = 2i32.pow(16); //13bitのままだと音が小さいので16bit
 fn main() -> ! {
     info!("Program start");
     info!("BUFFER_SIZE: {=usize}", BUFFER_SIZE);
-    info!("SAMPLE_RATE: {=usize}", SAMPLE_RATE);
-    info!("PDM_CLOCK_RATE: {=usize}", PDM_CLOCK_RATE);
+    info!("SAMPLE_RATE: {=u32}", SAMPLE_RATE.raw());
+    info!("PDM_CLOCK_RATE: {=u32}", PDM_CLOCK_HZ.raw());
     info!("CIC_DECIMATION_FACTOR: {=usize}", CIC_DECIMATION_FACTOR);
 
     let mut pac = pac::Peripherals::take().unwrap();
@@ -202,14 +212,14 @@ fn main() -> ! {
     // MCLK送信用PIOの設定
     let (mut sm0, _rx0, _tx0) = PIOBuilder::from_program(pio_i2s_mclk_output)
         .set_pins(mclk_pin.id().num, 1)
-        .clock_divisor_fixed_point(PIO_CLOCKDIV_INT, PIO_CLOCKDIV_FRAC)
+        .clock_divisor_fixed_point(I2S_PIO_CLOCKDIV_INT, I2S_PIO_CLOCKDIV_FRAC)
         .build(sm0);
 
     // I2S送信用PIOの設定
     let (mut sm1, _rx1, tx1) = PIOBuilder::from_program(pio_i2s_send_master)
         .out_pins(i2s_send_data_pin.id().num, 1)
         .side_set_pin_base(i2s_send_sclk_pin.id().num)
-        .clock_divisor_fixed_point(PIO_CLOCKDIV_INT, PIO_CLOCKDIV_FRAC)
+        .clock_divisor_fixed_point(I2S_PIO_CLOCKDIV_INT, I2S_PIO_CLOCKDIV_FRAC)
         .out_shift_direction(ShiftDirection::Left) //左シフト I2SはMSB first
         .autopull(true)
         .pull_threshold(32u8) //Bit-depth: 32bit
@@ -221,7 +231,7 @@ fn main() -> ! {
         .in_pin_base(pdm_input_pin.id().num)
         .side_set_pin_base(pdm_clock_output_pin.id().num)
         .jmp_pin(pdm_pio_jump_pin.id().num) // PIO起動直後はJUMP PINをHighにしてPDM clockを1.536MHzにし、1秒くらい経ったらLowにして3.072MHzにする
-        .clock_divisor_fixed_point(PIO_CLOCKDIV_INT, PIO_CLOCKDIV_FRAC)
+        .clock_divisor_fixed_point(PDM_PIO_CLOCKDIV_INT, PDM_PIO_CLOCKDIV_FRAC)
         .in_shift_direction(ShiftDirection::Left) //左シフト
         .autopush(true)
         .push_threshold(32u8) //Bit-depth: 32bit
