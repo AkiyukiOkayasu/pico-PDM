@@ -37,3 +37,31 @@
     nop [3]        side 0b1; in命令の前に4clock分マージンを入れる
     in pins, 1 side 0b1; Rch
 .wrap
+
+; PDM stereo SPH0641LU4H ultrasonic mode
+; SPH0641LU4Hをultrasonic modeで動作するためのPIOプログラム
+; テストに使用したのは秋月電子のBreakout board
+; https://akizukidenshi.com/download/ds/knowles/SPH0641LU4H-1.PDF
+; Master
+; fs: 48kHz
+; sysClk: 153.6MHz
+; PIO Clock freq: 15.36MHz (320fs)
+; PDM clock: 起動後1秒間は1.536MHz(48kHz * 32), その後は3.072MHz(48kHz * 64)
+; side-set: 1 (PDM clock)
+; SPH0641LU4Hは起動直後にはultrasonic modeに入れない。そのためPIOプログラム起動時はJUMPピンをHighにすることでPDM clockを1.536MHzにする。このときはDataは取得しない。
+; 1秒ほど待ってからLowにすると3.072MHzで動作し、Data取得を開始する。
+; Akiyuki Okayasu
+
+.program pdm_stereo_SPH0641LU4H_ultrasonic_mode
+.side_set 1
+
+loop:
+    nop [4]    side 0b0; in命令の前に4clock分マージンを入れる
+    nop [3]        side 0b1; in命令の前に4clock分マージンを入れる    
+    jmp pin loop side 0b1
+.wrap_target    
+    nop [1]    side 0b0; in命令の前に1clock分マージンを入れる
+    in pins, 1 side 0b0; Lch    
+    nop        side 0b1; in命令の前に1clock分マージンを入れる
+    in pins, 1 side 0b1; Rch
+.wrap

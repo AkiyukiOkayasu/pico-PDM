@@ -9,6 +9,7 @@ use cic_fixed::CicDecimationFilter;
 use cortex_m::singleton;
 use defmt::*;
 use defmt_rtt as _;
+use embedded_hal::digital::v2::OutputPin;
 use fixed::types::I1F31;
 use fugit::HertzU32;
 use heapless::spsc::Queue;
@@ -170,11 +171,17 @@ fn main() -> ! {
     let i2s_send_lrclk_pin = pins.gpio11.into_function::<FunctionPio0>();
     let pdm_input_pin = pins.gpio12.into_function::<FunctionPio0>();
     let pdm_clock_output_pin = pins.gpio13.into_function::<FunctionPio0>();
+    let mut pdm_pio_jump_pin = pins.gpio14.into_push_pull_output();
+    pdm_pio_jump_pin.set_high().unwrap(); //PDM用PIOの起動直後はJUMP PINをHighにしてPDM clockを1.536MHzにし、1秒くらい経ったらLowにして3.072MHzにしてUltrasonic modeにする
 
     //=============================PIO===============================
     let pio_i2s_mclk_output = pio_file!("./src/i2s.pio", select_program("mclk_output")).program;
     let pio_i2s_send_master = pio_file!("./src/i2s.pio", select_program("i2s_send_master")).program;
-    let pio_pdm = pio_file!("./src/pdm.pio", select_program("pdm_stereo")).program;
+    let pio_pdm = pio_file!(
+        "./src/pdm.pio",
+        select_program("pdm_stereo_SPH0641LU4H_ultrasonic_mode")
+    )
+    .program;
 
     // Initialize and start PIO
     let (mut pio, sm0, sm1, sm2, _sm3) = pac.PIO0.split(&mut pac.RESETS);
@@ -203,6 +210,7 @@ fn main() -> ! {
     let (mut sm2, rx2, _tx1) = PIOBuilder::from_program(pio_pdm)
         .in_pin_base(pdm_input_pin.id().num)
         .side_set_pin_base(pdm_clock_output_pin.id().num)
+        .jmp_pin(pdm_pio_jump_pin.id().num) // PIO起動直後はJUMP PINをHighにしてPDM clockを1.536MHzにし、1秒くらい経ったらLowにして3.072MHzにする
         .clock_divisor_fixed_point(PIO_CLOCKDIV_INT, PIO_CLOCKDIV_FRAC)
         .in_shift_direction(ShiftDirection::Left) //左シフト
         .autopush(true)
@@ -243,7 +251,6 @@ fn main() -> ! {
     let mut pdm_rx_transfer = pdm_rx_transfer.write_next(pdm_rx_buf2);
 
     let sm_group_i2s_pdm = sm1.with(sm2); //I2SとPDMのPIOを同時にスタートさせるためにグループ化する
-    sm_group_i2s_pdm.start(); // Start I2S and PDM PIO
 
     let mut l_pdm_queue: Queue<I1F31, PDM_QUEUE_SIZE> = Queue::new();
     let mut r_pdm_queue: Queue<I1F31, PDM_QUEUE_SIZE> = Queue::new();
@@ -262,6 +269,11 @@ fn main() -> ! {
             r_pdm_queue.enqueue(I1F31::ZERO).unwrap();
         }
     }
+
+    //I2SとPDMのPIOスタート
+    sm_group_i2s_pdm.start();
+    delay.delay_ms(1000);
+    pdm_pio_jump_pin.set_low().unwrap(); //PDM用PIOの起動直後はJUMP PINをHighにしてPDM clockを1.536MHzにし、1秒くらい経ったらLowにして3.072MHzにしてUltrasonic modeにする
 
     loop {
         // I2SのDMA転送が終わったら即座にもう片方のバッファーを転送する
