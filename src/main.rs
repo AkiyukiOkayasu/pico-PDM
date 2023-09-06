@@ -53,6 +53,10 @@ const PIO_CLOCKDIV_FRAC: u8 = 0u8;
 /// バッファーサイズ（サンプル）
 const BUFFER_SIZE: usize = 16;
 const PDM_QUEUE_SIZE: usize = BUFFER_SIZE * 2;
+const SAMPLE_RATE: usize = 48000; // PCMのサンプリング周波数
+const PDM_CLOCK_RATE: usize = 3072000; //PDM clockの周波数
+
+const CIC_DECIMATION_FACTOR: usize = PDM_CLOCK_RATE / SAMPLE_RATE; //CICフィルターのデシメーションファクター
 
 //CICフィルターの出力（19bit）を32bit固定小数点に正規化するためのゲイン
 // const GAIN: i32 = 2i32.pow(13);
@@ -62,6 +66,10 @@ const GAIN: i32 = 2i32.pow(16); //13bitのままだと音が小さいので16bit
 fn main() -> ! {
     info!("Program start");
     info!("BUFFER_SIZE: {=usize}", BUFFER_SIZE);
+    info!("SAMPLE_RATE: {=usize}", SAMPLE_RATE);
+    info!("PDM_CLOCK_RATE: {=usize}", PDM_CLOCK_RATE);
+    info!("CIC_DECIMATION_FACTOR: {=usize}", CIC_DECIMATION_FACTOR);
+
     let mut pac = pac::Peripherals::take().unwrap();
     let core = pac::CorePeripherals::take().unwrap();
     let mut watchdog = Watchdog::new(pac.WATCHDOG);
@@ -258,8 +266,8 @@ fn main() -> ! {
 
     let mut l_pdm_queue: Queue<I1F31, PDM_QUEUE_SIZE> = Queue::new();
     let mut r_pdm_queue: Queue<I1F31, PDM_QUEUE_SIZE> = Queue::new();
-    let mut l_cic = CicDecimationFilter::<64, 3>::new(); //CICフィルターの初期化
-    let mut r_cic = CicDecimationFilter::<64, 3>::new(); //CICフィルターの初期化
+    let mut l_cic = CicDecimationFilter::<CIC_DECIMATION_FACTOR, 3>::new(); //CICフィルターの初期化
+    let mut r_cic = CicDecimationFilter::<CIC_DECIMATION_FACTOR, 3>::new(); //CICフィルターの初期化
     const INPUT_BITS: u32 = 1; //PDMなので1bit
     let bit_growth = l_cic.bit_growth(); //CICフィルターによって増加するBit数
     let output_bits = INPUT_BITS + bit_growth; //CICフィルターから出力されるBit数
