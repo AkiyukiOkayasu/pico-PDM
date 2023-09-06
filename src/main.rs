@@ -54,9 +54,12 @@ const I2S_PIO_CLOCKDIV_FRAC: u8 = 0u8;
 /// PDM clockの周波数
 const PDM_CLOCK_HZ: HertzU32 = HertzU32::from_raw(3_072_000);
 
+/// PDM用PIOの動作周波数 (fs*64*5) I2SのMCLKをPIOで作るのでfsの整数倍にする
+const PDM_PIO_CLOCK_HZ: HertzU32 = HertzU32::from_raw(15_360_000);
+
 /// PDM用PIOの分周比率の整数部分 RP2040動作周波数/PIO動作周波数
 /// int + (frac/256)で分周する
-const PDM_PIO_CLOCKDIV_INT: u16 = (RP2040_CLOCK_HZ.raw() / PDM_CLOCK_HZ.raw()) as u16;
+const PDM_PIO_CLOCKDIV_INT: u16 = (RP2040_CLOCK_HZ.raw() / PDM_PIO_CLOCK_HZ.raw()) as u16;
 /// PDM用PIOの分周比率の少数部分 Jitterを最小にするには0にするべき
 const PDM_PIO_CLOCKDIV_FRAC: u8 = 0u8;
 
@@ -77,6 +80,8 @@ fn main() -> ! {
     info!("SAMPLE_RATE: {=u32}", SAMPLE_RATE.raw());
     info!("PDM_CLOCK_RATE: {=u32}", PDM_CLOCK_HZ.raw());
     info!("CIC_DECIMATION_FACTOR: {=usize}", CIC_DECIMATION_FACTOR);
+    info!("I2S_PIO_CLOCKDIV_INT: {=u16}", I2S_PIO_CLOCKDIV_INT);
+    info!("PDM_PIO_CLOCKDIV_INT: {=u16}", PDM_PIO_CLOCKDIV_INT);
 
     let mut pac = pac::Peripherals::take().unwrap();
     let core = pac::CorePeripherals::take().unwrap();
