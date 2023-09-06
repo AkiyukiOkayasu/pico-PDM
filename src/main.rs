@@ -54,6 +54,10 @@ const PIO_CLOCKDIV_FRAC: u8 = 0u8;
 const BUFFER_SIZE: usize = 16;
 const PDM_QUEUE_SIZE: usize = BUFFER_SIZE * 2;
 
+//CICフィルターの出力（19bit）を32bit固定小数点に正規化するためのゲイン
+// const GAIN: i32 = 2i32.pow(13);
+const GAIN: i32 = 2i32.pow(16); //13bitのままだと音が小さいので16bitにしてみる
+
 #[entry]
 fn main() -> ! {
     info!("Program start");
@@ -288,13 +292,13 @@ fn main() -> ! {
                     // Lch
                     let l = l_pdm_queue.dequeue().unwrap_or(I1F31::ZERO);
                     // 信号処理をするならここでやる
-                    let sample = l.to_bits() * (2 ^ 13); //CICフィルターの出力（19bit）を32bit固定小数点に正規化
+                    let sample = l.to_bits() * GAIN;
                     *e = sample as u32;
                 } else {
                     // Rch
                     let r = r_pdm_queue.dequeue().unwrap_or(I1F31::ZERO);
                     // 信号処理をするならここでやる
-                    let sample = r.to_bits() * (2 ^ 13); //CICフィルターの出力（19bit）を32bit固定小数点に正規化
+                    let sample = r.to_bits() * GAIN;
                     *e = sample as u32;
                 }
             }
