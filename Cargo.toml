@@ -19,7 +19,7 @@ defmt-rtt = "0.4"
 panic-probe = { version = "0.3", features = ["print-defmt"] }
 
 # We're using a Pico by default on this template
-rp-pico = "0.8.0"
+rp-pico = { version = "0.8.0", default-features = false, features = ["rt", "critical-section-impl", "rom-func-cache"] }
 fugit = "0.3.7"
 fixed = "1.23.1"
 pio = "0.2.1"
@@ -32,7 +32,7 @@ cic-fixed = { git = "https://github.com/AkiyukiOkayasu/cic-fixed", branch = "mai
 
 # If you're not going to use a Board Support Package you'll need these:
 # rp2040-hal = { version="0.8", features=["rt", "critical-section-impl"] }
-# rp2040-boot2 = "0.2"
+rp2040-boot2 = "0.3.0"
 
 # cargo build/run
 [profile.dev]
