@@ -318,13 +318,13 @@ fn main() -> ! {
                     // Lch
                     let l = l_pdm_queue.dequeue().unwrap_or(I1F31::ZERO);
                     // 信号処理をするならここでやる
-                    let sample = l.to_bits() * GAIN;
+                    let sample = l.to_bits().saturating_mul(GAIN);
                     *e = sample as u32;
                 } else {
                     // Rch
                     let r = r_pdm_queue.dequeue().unwrap_or(I1F31::ZERO);
                     // 信号処理をするならここでやる
-                    let sample = r.to_bits() * GAIN;
+                    let sample = r.to_bits().saturating_mul(GAIN);
                     *e = sample as u32;
                 }
             }
