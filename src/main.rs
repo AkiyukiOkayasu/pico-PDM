@@ -59,7 +59,7 @@ const I2S_PIO_CLOCKDIV_FRAC: u8 = 0u8;
 /// PDM clockの周波数
 const PDM_CLOCK_HZ: HertzU32 = HertzU32::from_raw(3_072_000);
 
-/// PDM用PIOの動作周波数 (fs*64*5) I2SのMCLKをPIOで作るのでfsの整数倍にする
+/// PDM用PIOの動作周波数
 const PDM_PIO_CLOCK_HZ: HertzU32 = HertzU32::from_raw(15_360_000);
 
 /// PDM用PIOの分周比率の整数部分 RP2040動作周波数/PIO動作周波数
