@@ -42,10 +42,10 @@ mod rp2040_pll_settings_for_48khz_audio;
 const EXTERNAL_XTAL_FREQ_HZ: HertzU32 = HertzU32::from_raw(12_000_000u32);
 
 /// RP2040の動作周波数
-const RP2040_CLOCK_HZ: HertzU32 = HertzU32::from_raw(230_400_000u32);
+const RP2040_CLOCK_HZ: HertzU32 = HertzU32::from_raw(307_200_000u32);
 
 /// PCMのサンプリング周波数
-const SAMPLE_RATE: HertzU32 = HertzU32::from_raw(48_000u32);
+const SAMPLE_RATE: HertzU32 = HertzU32::from_raw(96_000u32);
 
 /// I2S用PIOの動作周波数 (fs*64*5) I2SのMCLKをPIOで作るのでfsの整数倍にする
 const I2S_PIO_CLOCK_HZ: HertzU32 = HertzU32::from_raw(SAMPLE_RATE.raw() * 64u32 * 5u32);
@@ -70,7 +70,7 @@ const PDM_PIO_CLOCKDIV_FRAC: u8 = 0u8;
 
 /// バッファーサイズ（サンプル）
 const BUFFER_SIZE: usize = 16;
-const PDM_QUEUE_SIZE: usize = BUFFER_SIZE * 2;
+const PDM_QUEUE_SIZE: usize = BUFFER_SIZE * 4;
 
 const CIC_DECIMATION_FACTOR: usize = (PDM_CLOCK_HZ.raw() / SAMPLE_RATE.raw()) as usize; //CICフィルターのデシメーションファクター
 
@@ -120,7 +120,7 @@ fn main() -> ! {
         let pll_sys = setup_pll_blocking(
             pac.PLL_SYS,
             xosc.operating_frequency(),
-            rp2040_pll_settings_for_48khz_audio::SYS_PLL_CONFIG_230P4MHZ,
+            rp2040_pll_settings_for_48khz_audio::SYS_PLL_CONFIG_307P2MHZ,
             &mut clocks,
             &mut pac.RESETS,
         )
