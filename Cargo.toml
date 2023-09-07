@@ -32,7 +32,7 @@ cic-fixed = { git = "https://github.com/AkiyukiOkayasu/cic-fixed", branch = "mai
 
 # If you're not going to use a Board Support Package you'll need these:
 # rp2040-hal = { version="0.8", features=["rt", "critical-section-impl"] }
-rp2040-boot2 = "0.3.0"
+rp2040-boot2 = "0.2.1"
 
 # cargo build/run
 [profile.dev]
