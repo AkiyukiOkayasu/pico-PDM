@@ -664,6 +664,7 @@ dependencies = [
  "pio",
  "pio-proc",
  "rp-pico",
+ "rp2040-boot2",
 ]
 
 [[package]]
@@ -832,7 +833,6 @@ checksum = "6341771e6f8e5d130b2b3cbc23435b7847761adf198af09f4b2a60407d43bd56"
 dependencies = [
  "cortex-m-rt",
  "fugit",
- "rp2040-boot2",
  "rp2040-hal",
  "usb-device",
 ]
