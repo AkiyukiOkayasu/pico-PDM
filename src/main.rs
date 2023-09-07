@@ -93,6 +93,13 @@ fn main() -> ! {
     let mut watchdog = Watchdog::new(pac.WATCHDOG);
     let sio = Sio::new(pac.SIO);
 
+    unsafe {
+        // Core電圧(vreg)を1.25Vに設定
+        pac.VREG_AND_CHIP_RESET
+            .vreg
+            .write(|w| w.vsel().bits(0b1110));
+    }
+
     // Enable the xosc
     let xosc = setup_xosc_blocking(pac.XOSC, EXTERNAL_XTAL_FREQ_HZ)
         .map_err(InitError::XoscErr)
