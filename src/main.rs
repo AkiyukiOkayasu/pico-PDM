@@ -96,12 +96,10 @@ fn main() -> ! {
     let vreg_voltage = pac.VREG_AND_CHIP_RESET.vreg.read().vsel().bits();
     info!("VREG voltage: {=u8:b}", vreg_voltage);
 
-    unsafe {
-        // Core電圧(vreg)を1.25Vに設定
-        pac.VREG_AND_CHIP_RESET
-            .vreg
-            .write(|w| w.vsel().bits(0b1110));
-    }
+    // Core電圧(vreg)を1.25Vに設定
+    pac.VREG_AND_CHIP_RESET
+        .vreg
+        .write(|w| unsafe { w.vsel().bits(0b1110) });
 
     let vreg_voltage = pac.VREG_AND_CHIP_RESET.vreg.read().vsel().bits();
     info!("VREG voltage: {=u8:b}", vreg_voltage);
