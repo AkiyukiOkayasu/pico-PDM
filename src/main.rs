@@ -93,12 +93,18 @@ fn main() -> ! {
     let mut watchdog = Watchdog::new(pac.WATCHDOG);
     let sio = Sio::new(pac.SIO);
 
+    let vreg_voltage = pac.VREG_AND_CHIP_RESET.vreg.read().vsel().bits();
+    info!("VREG voltage: {=u8:b}", vreg_voltage);
+
     unsafe {
         // Core電圧(vreg)を1.25Vに設定
         pac.VREG_AND_CHIP_RESET
             .vreg
             .write(|w| w.vsel().bits(0b1110));
     }
+
+    let vreg_voltage = pac.VREG_AND_CHIP_RESET.vreg.read().vsel().bits();
+    info!("VREG voltage: {=u8:b}", vreg_voltage);
 
     // Enable the xosc
     let xosc = setup_xosc_blocking(pac.XOSC, EXTERNAL_XTAL_FREQ_HZ)
