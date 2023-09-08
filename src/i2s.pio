@@ -20,7 +20,7 @@
 ; PIO Clock freq: 15.36MHz (320fs@48kHz), 30.72MHz (320fs@96kHz)
 ; Bit depth: 32bit
 ; Jitter軽減のため、PIO分周比率は整数にするのが望ましい。
-; fs=48kHzのときは、sysClk: 153.6MHz or 230.4MHzにすると整数にできる。
+; fs=48kHzのときは、sysClk: 76.8MHz or 153.6MHz or 230.4MHz or 384MHzにすると整数にできる。
 ; fs=96kHzのときは、sysClk: 153.6MHz or 307.2MHzにすると整数にできる。
 
 .program i2s_send_master
