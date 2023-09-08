@@ -37,6 +37,7 @@ use bsp::hal::{
 };
 
 mod rp2040_pll_settings_for_48khz_audio;
+mod vreg;
 
 /// External high-speed crystal on the pico board is 12Mhz
 const EXTERNAL_XTAL_FREQ_HZ: HertzU32 = HertzU32::from_raw(12_000_000u32);
@@ -93,15 +94,14 @@ fn main() -> ! {
     let mut watchdog = Watchdog::new(pac.WATCHDOG);
     let sio = Sio::new(pac.SIO);
 
-    let vreg_voltage = pac.VREG_AND_CHIP_RESET.vreg.read().vsel().bits();
+    //=============================VREG===============================
+    // Core電圧(vreg)を取得
+    let vreg_voltage = vreg::vreg_get_voltage(&mut pac.VREG_AND_CHIP_RESET);
     info!("VREG voltage: {=u8:b}", vreg_voltage);
-
     // Core電圧(vreg)を1.25Vに設定
-    pac.VREG_AND_CHIP_RESET
-        .vreg
-        .write(|w| unsafe { w.vsel().bits(0b1110) });
-
-    let vreg_voltage = pac.VREG_AND_CHIP_RESET.vreg.read().vsel().bits();
+    vreg::vreg_set_voltage(&mut pac.VREG_AND_CHIP_RESET, vreg::VregVoltage::Voltage1_25);
+    // Core電圧(vreg)を再度取得して確認
+    let vreg_voltage = vreg::vreg_get_voltage(&mut pac.VREG_AND_CHIP_RESET);
     info!("VREG voltage: {=u8:b}", vreg_voltage);
 
     // Enable the xosc
