@@ -104,6 +104,7 @@ fn main() -> ! {
     let vreg_voltage = vreg::vreg_get_voltage(&mut pac.VREG_AND_CHIP_RESET);
     info!("VREG voltage: {=u8:b}", vreg_voltage);
 
+    //=============================CLOCK===============================
     // Enable the xosc
     let xosc = setup_xosc_blocking(pac.XOSC, EXTERNAL_XTAL_FREQ_HZ)
         .map_err(InitError::XoscErr)
