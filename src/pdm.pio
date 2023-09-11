@@ -56,8 +56,8 @@
 .side_set 1
 
 loop:
-    nop [4]    side 0b0; in命令の前に4clock分マージンを入れる
-    nop [3]        side 0b1; in命令の前に4clock分マージンを入れる    
+    nop [4]      side 0b0; in命令の前に4clock分マージンを入れる
+    nop [3]      side 0b1; in命令の前に4clock分マージンを入れる    
     jmp pin loop side 0b1
 .wrap_target    
     nop [1]    side 0b0; in命令の前に1clock分マージンを入れる
