@@ -46,7 +46,7 @@ pub fn vreg_set_voltage(vreg_dev: &mut VREG_AND_CHIP_RESET, voltage: VregVoltage
 }
 
 /// Get voltage
+/// TODO u8からVregVoltageに変換する
 pub fn vreg_get_voltage(vreg_dev: &mut VREG_AND_CHIP_RESET) -> u8 {
-    let vreg_voltage = vreg_dev.vreg.read().vsel().bits();
-    vreg_voltage
+    vreg_dev.vreg.read().vsel().bits()
 }
