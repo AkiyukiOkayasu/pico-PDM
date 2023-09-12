@@ -7,7 +7,7 @@ description = "CIC filter"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/AkiyukiOkayasu/pico-PDM"
 readme = "README.md"
-rust-version = "1.68.2"
+rust-version = "1.72.0"
 
 [dependencies]
 cortex-m = "0.7"
